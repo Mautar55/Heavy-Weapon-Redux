@@ -2,8 +2,7 @@
 #include <stdlib.h>
 
 typedef struct {
-    int position_x;
-    int position_y;
+    Vector3 position;
 } CircleData;
 
 typedef struct {

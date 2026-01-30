@@ -13,10 +13,11 @@
     }};\
 
 int main(void) {
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 600, "Hello Raylib");
-    SetTargetFPS(60);
 
-    CircleList circles = {0};
+    CircleDataArray circles = {0};
     srand(time(NULL));
     for (int i = 0; i < 30; i++) {
         CircleData c = random_sphere;
@@ -24,13 +25,24 @@ int main(void) {
     }
 
     Camera camera = { 0 };
-    camera.position = (Vector3){ 0.0f, 10.0f, 10.0f };
-    camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-    camera.fovy = 45.0f;
-    camera.projection = CAMERA_PERSPECTIVE;
+    camera.position = (Vector3){ 0.0f, 2.0f, 4.0f };    // Camera position
+    camera.target = (Vector3){ 0.0f, 2.0f, 0.0f };      // Camera looking at point
+    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
+    camera.fovy = 60.0f;                                // Camera field-of-view Y
+    camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
 
-    while (!WindowShouldClose()) {
+    DisableCursor();                    // Limit cursor to relative movement inside the window
+
+    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
+
+    // Main game loop
+    while (!WindowShouldClose())        // Detect window close button or ESC key
+    {
+        // Update
+        //----------------------------------------------------------------------------------
+        UpdateCamera(&camera, CAMERA_FIRST_PERSON);
+
         if (IsKeyPressed(KEY_K)) {
             CircleData c = random_sphere;
             da_append(circles, c);
@@ -48,7 +60,11 @@ int main(void) {
 
         for (size_t i = 0; i < circles.size; i++) {
             DrawSphere(circles.items[i].position, 0.25f, DARKGREEN);
-            DrawCircle3D(Vector3Add(circles.items[i].position,(Vector3){0.0,-0.125,0.0}), 0.25f, (Vector3){0,0,1},90.0, DARKGRAY);
+            DrawCircle3D(Vector3Add(circles.items[i].position,(Vector3){0.0,-0.25,0.0})
+                , 0.25f
+                , (Vector3){1,0,0}
+                ,90.0
+                , DARKGRAY);
         }
 
         EndMode3D();

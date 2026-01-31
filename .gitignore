@@ -1,0 +1,83 @@
+# ────────────────────────────────────────────────
+# JetBrains CLion / IntelliJ family
+# ────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+
+# But you may want to commit some files (optional – most teams ignore all)
+# !.idea/misc.xml
+# !.idea/modules.xml
+# !.idea/*.iml
+
+# ────────────────────────────────────────────────
+# CMake build directories (CLion default pattern)
+# ────────────────────────────────────────────────
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+
+# ────────────────────────────────────────────────
+# vcpkg (especially when vendored / classic mode)
+# ────────────────────────────────────────────────
+vcpkg_installed/
+vcpkg/buildtrees/
+vcpkg/downloads/
+vcpkg/packages/
+vcpkg/buildsystems/
+vcpkg_installed_*/
+installed/
+
+# If you use manifest mode these are usually small → can be committed
+# vcpkg.json           ← usually committed
+# vcpkg-lock.json      ← usually committed (like package-lock.json)
+
+# If you have local machine-specific presets
+CMakeUserPresets.json
+
+# ────────────────────────────────────────────────
+# C/C++ build artifacts & temporary files
+# ────────────────────────────────────────────────
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.app/
+*.pdb
+*.ilk
+*.exp
+*.map
+*.pyc
+*.pyo
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# ────────────────────────────────────────────────
+# Common OS / editor files
+# ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ────────────────────────────────────────────────
+# Optional: testing / coverage
+# ────────────────────────────────────────────────
+*.gcda
+*.gcno
+*.gcov
+lcov.info
+coverage/
+test-results/

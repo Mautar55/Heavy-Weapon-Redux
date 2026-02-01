@@ -2,24 +2,30 @@
 #include <stdlib.h>
 #include "raylib.h"
 
+#define WMEM_INVALID_OFFSET ((size_t)-1)
+#define NULLWREF (wref){WMEM_INVALID_OFFSET}
+#define IS_NULLWREF .offset==WMEM_INVALID_OFFSET
+typedef struct {
+    size_t offset;
+}wref;
+
 typedef struct {
     Vector3 position;
 } CircleData;
 
 typedef struct {
-    size_t items_ref;
+    wref items_ref;
     size_t size;
     size_t capacity;
 } WArray;
 
-#define da_new(label)\
+#define arr_new(label)\
     WArray label = {0};\
-    label.items_ref = WMEM_INVALID_OFFSET;
-
+    label.items_ref = NULLWREF;
 
 // returns what used to be // T* items
 
-#define da_append(array, new_item)\
+#define arr_append(array, new_item)\
     do {\
         if ((array).size >= (array).capacity) {\
             if ((array).capacity == 0) (array).capacity = 256;\
@@ -32,7 +38,7 @@ typedef struct {
         memcpy((char*)ref->ptr + dest_i * elem_size, &new_item, elem_size);\
     } while(0)
 
-#define da_get(type_cast, array, index)\
+#define arr_get(type_cast, array, index)\
     ((type_cast*)WMemRefFromOffset(array.items_ref)->ptr)[index]\
 
 //da_struct(CircleData)
@@ -59,18 +65,44 @@ typedef struct {
 // Whenever new memory is requested, the positions of the references should not change,
 // But the pointers to allocated memory should not.
 
-#define WMEM_INVALID_OFFSET ((size_t)-1)
-
-size_t WMemAlloc(size_t size);
-size_t WMemRealloc(size_t offset, size_t size);
-void WMemFree(size_t offset);
+wref WMemAlloc(size_t size);
+wref WMemRealloc(wref ref, size_t size);
+void WMemFree(wref ref);
+void WMemClear();
 
 // To access the reference directly:
 // struct WMemRef* ref = (struct WMemRef*)((char*)state.start + offset);
 // But state is static in wutils.c. Let's add a helper to get the start pointer.
 void* WMemGetStart(void);
 
-static inline WMemRef* WMemRefFromOffset(size_t ref_offset)
+static inline WMemRef* WMemRefFromOffset(wref ref)
 {
-    return (WMemRef*)((char*)WMemGetStart() + ref_offset);
+    return (WMemRef*)((char*)WMemGetStart() + ref.offset);
 }
+
+/////////////////////////////////////////////////
+/// LINKED LIST
+/////////////////////////////////////////////////
+
+typedef struct {
+    WArray items;
+} WList;
+
+#define list_item(type)\
+    struct {\
+        type item;\
+        size_t prev;\
+        size_t next;\
+    }
+
+// implementar en main.c
+// y despues pasar a macro
+#define list_new(label)\
+    WList list = {0};\
+    arr_new(new_list);\
+    list.items = new_list;\
+    list.item_size = sizeof(list_item(typeof(type)));\
+
+
+// insert at position
+// delete at position

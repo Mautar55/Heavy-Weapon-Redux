@@ -14,17 +14,18 @@
     }};\
 
 int main(void) {
+
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 600, "Hello Raylib");
 
     //CircleDataArray circles = {0};
-    da_new(circles)
+    arr_new(circles)
 
     srand(time(NULL));
     for (int i = 0; i < 30; i++) {
         CircleData c = random_sphere;
-        da_append(circles, c);
+        arr_append(circles, c);
         // ARRAY , NEW_ITEM
         // ((WMemRef*)(WMemGetStart[(array).items_ref])).ptr[(array).size++] = new_item;
         //WMemRef *ref = WMemRefFromOffset(circles.items_ref);
@@ -54,7 +55,7 @@ int main(void) {
 
         if (IsKeyPressed(KEY_K)) {
             CircleData c = random_sphere;
-            da_append(circles, c);
+            arr_append(circles, c);
         }
         if (IsKeyPressed(KEY_L)) {
             if (circles.size > 0) circles.size--;
@@ -68,8 +69,8 @@ int main(void) {
         DrawGrid(10, 1.0f);
 
         for (size_t i = 0; i < circles.size; i++) {
-            DrawSphere(da_get(CircleData,circles,i).position, 0.25f, DARKGREEN);
-            DrawCircle3D(Vector3Add(da_get(CircleData,circles,i).position,(Vector3){0.0,-0.25,0.0})
+            DrawSphere(arr_get(CircleData,circles,i).position, 0.25f, DARKGREEN);
+            DrawCircle3D(Vector3Add(arr_get(CircleData,circles,i).position,(Vector3){0.0,-0.25,0.0})
                 , 0.25f
                 , (Vector3){1,0,0}
                 ,90.0
@@ -84,7 +85,7 @@ int main(void) {
         
         EndDrawing();
     }
-
     CloseWindow();
+    WMemClear();
     return 0;
 }

@@ -20,7 +20,7 @@ void* WMemGetStart() {
     return state.start;
 }
 
-size_t WMemAlloc(size_t size) {
+wref WMemAlloc(size_t size) {
     if (state.references_capacity == 0) {
         state.references_capacity = 256;
         state.references_capacity_jump = 256;
@@ -108,47 +108,51 @@ size_t WMemAlloc(size_t size) {
     
     state.pool_size += size;
     
-    return found_slot * sizeof(WMemRef);
+    return (wref){found_slot * sizeof(WMemRef)};
 }
 
-size_t WMemRealloc(size_t offset, size_t size) {
-    if (offset == WMEM_INVALID_OFFSET) return WMemAlloc(size);
+wref WMemRealloc(wref ref, size_t size) {
+    if (ref IS_NULLWREF) return WMemAlloc(size);
     if (size == 0) {
-        WMemFree(offset);
-        return WMEM_INVALID_OFFSET;
+        WMemFree(ref);
+        return NULLWREF;
     }
 
     WMemRef* refs = WMemGetRefArray();
-    size_t index = offset / sizeof(WMemRef);
+    size_t index = ref.offset / sizeof(WMemRef);
     
     if (index < state.references_capacity && refs[index].ptr != NULL) {
         void* old_ptr = refs[index].ptr;
         size_t old_size = refs[index].size;
 
-        size_t new_offset = WMemAlloc(size);
+        wref new_ref = WMemAlloc(size);
         WMemRef* new_refs = WMemGetRefArray();
-        size_t new_index = new_offset / sizeof(WMemRef);
+        size_t new_index = new_ref.offset / sizeof(WMemRef);
         void* new_ptr = new_refs[new_index].ptr;
 
         size_t copy_size = (size < old_size) ? size : old_size;
         memcpy(new_ptr, old_ptr, copy_size);
         
         // Mark old slot as free
-        WMemFree(offset);
-        return new_offset;
+        WMemFree(ref);
+        return new_ref;
     }
     
-    return WMEM_INVALID_OFFSET;
+    return NULLWREF;
 }
 
-void WMemFree(size_t offset) {
-    if (offset == WMEM_INVALID_OFFSET) return;
+void WMemFree(wref ref) {
+    if (ref IS_NULLWREF) return;
     WMemRef* refs = WMemGetRefArray();
-    size_t index = offset / sizeof(WMemRef);
+    size_t index = ref.offset / sizeof(WMemRef);
     
     if (index < state.references_capacity) {
         // Mark as free by setting ptr to NULL
         refs[index].ptr = NULL;
         refs[index].size = 0;
     }
+}
+
+void WMemClear() {
+    MemFree(WMemGetRefArray());
 }

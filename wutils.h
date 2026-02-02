@@ -4,7 +4,7 @@
 
 #define NULL_OFFSET ((size_t)-1)
 #define NULLWREF (wref){NULL_OFFSET}
-#define IS_NULLWREF .offset==WMEM_INVALID_OFFSET
+#define IS_NULLWREF .offset==NULL_OFFSET
 typedef struct {
     size_t offset;
 }wref;

@@ -41,7 +41,19 @@ typedef struct {
 #define arr_get(type_cast, array, index)\
     ((type_cast*)WMemRefFromOffset(array.items_ref)->ptr)[index]\
 
-//da_struct(CircleData)
+#define arr_set(array, index, new_item)\
+    do {\
+        size_t _i = (size_t)(index);\
+        size_t _elem_size = sizeof(new_item);\
+        if (_i >= (array).capacity) {\
+            if ((array).capacity == 0) (array).capacity = 256;\
+            while (_i >= (array).capacity) (array).capacity *= 2;\
+            (array).items_ref = WMemRealloc((array).items_ref, (array).capacity * _elem_size);\
+        }\
+        WMemRef *_ref = WMemRefFromOffset((array).items_ref);\
+        memcpy((char*)_ref->ptr + _i * _elem_size, &(new_item), _elem_size);\
+        if (_i >= (array).size) (array).size = _i + 1;\
+    } while (0)
 
 // Heap memory management
 
@@ -85,6 +97,8 @@ static inline WMemRef* WMemRefFromOffset(wref ref)
 /////////////////////////////////////////////////
 
 typedef struct {
+    size_t list_size;
+    size_t starting_index;
     WArray items;
 } WList;
 
@@ -105,6 +119,7 @@ declare_list_item(ShapeData)
     list.items = new_list;\
     list.item_size = sizeof(list_item(typeof(type)));\
 
+void list_insert_at(WList* target_list, ShapeData* item_to_add, size_t target_pos);
 
 // insert at position
 // delete at position

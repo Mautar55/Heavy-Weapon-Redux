@@ -36,7 +36,7 @@ int main(void) {
     WList cubes_list = {0};
     arr_new(cubes_inner)
     cubes_list.items = cubes_inner;
-
+    cubes_list.list_size = 0;
     // fill
     for (int i = 0; i < 10; i++) {
         ShapeDataInList c = {0};
@@ -52,9 +52,17 @@ int main(void) {
             c.next = i+1;
         }
         arr_append(cubes_inner, c);
+        cubes_list.list_size++;
     }
 
+    cubes_list.starting_index = 0;
+
     // insert at position x
+    ShapeData to_add = {0};
+    to_add.position = (Vector3)random_position;
+    WList* target_list = &cubes_list;
+    size_t target_pos = 5;
+    list_insert_at(target_list, &to_add, target_pos);
 
     // insert
 

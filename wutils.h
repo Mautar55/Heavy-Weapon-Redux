@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include "raylib.h"
 
-#define WMEM_INVALID_OFFSET ((size_t)-1)
-#define NULLWREF (wref){WMEM_INVALID_OFFSET}
+#define NULL_OFFSET ((size_t)-1)
+#define NULLWREF (wref){NULL_OFFSET}
 #define IS_NULLWREF .offset==WMEM_INVALID_OFFSET
 typedef struct {
     size_t offset;
@@ -11,7 +11,7 @@ typedef struct {
 
 typedef struct {
     Vector3 position;
-} CircleData;
+} ShapeData;
 
 typedef struct {
     wref items_ref;
@@ -88,12 +88,14 @@ typedef struct {
     WArray items;
 } WList;
 
-#define list_item(type)\
-    struct {\
+#define declare_list_item(type)\
+    typedef struct {\
         type item;\
         size_t prev;\
         size_t next;\
-    }
+    } type##InList;
+
+declare_list_item(ShapeData)
 
 // implementar en main.c
 // y despues pasar a macro

@@ -201,16 +201,19 @@ void list_insert_at_size(WList* target_list, ColoredShape* item_to_add, size_t i
 
     } else {
         size_t current_index = target_list->starting_index;
-        while (true) {
-            current = &arr_get(ColoredShapeInList,target_list->items,current_index);
-            if (current->next == NULL_OFFSET) {
-                current->next = found_av;
-                new_prev = current_index;
-                break;
-            } else {
-                current_index = current->next;
-            }
-        };
+        if (target_list->list_size > 0) {
+            while (true) {
+                current = &arr_get(ColoredShapeInList,target_list->items,current_index);
+                if (current->next == NULL_OFFSET) {
+                    current->next = found_av;
+                    new_prev = current_index;
+                    break;
+                } else {
+                    current_index = current->next;
+                }
+            };
+        }
+
     }
 
     ColoredShapeInList new_cube = {0};

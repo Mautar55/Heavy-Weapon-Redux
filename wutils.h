@@ -14,6 +14,11 @@ typedef struct {
 } ShapeData;
 
 typedef struct {
+    Vector3 position;
+    Color color;
+} ColoredShape;
+
+typedef struct {
     wref items_ref;
     size_t size;
     size_t capacity;
@@ -109,7 +114,7 @@ typedef struct {
         size_t next;\
     } type##InList;
 
-declare_list_item(ShapeData)
+declare_list_item(ColoredShape)
 
 // implementar en main.c
 // y despues pasar a macro
@@ -119,7 +124,7 @@ declare_list_item(ShapeData)
     list.items = new_list;\
     list.item_size = sizeof(list_item(typeof(type)));\
 
-void list_insert_at(WList* target_list, ShapeData* item_to_add, size_t target_pos);
+void list_insert_at(WList* target_list, ColoredShape* item_to_add, size_t target_pos);
 
 // insert at position
 // delete at position

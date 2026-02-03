@@ -161,7 +161,7 @@ void WMemClear() {
 /// LIST IMPLEMENTATION
 ///////////////////////////////////////////////////////
 
-void list_insert_at(WList* target_list, ShapeData* item_to_add, size_t in_target_pos){
+void list_insert_at(WList* target_list, ColoredShape* item_to_add, size_t in_target_pos){
 
     size_t target_pos = (in_target_pos >= target_list->list_size)
     ? target_list->list_size : in_target_pos;
@@ -169,7 +169,7 @@ void list_insert_at(WList* target_list, ShapeData* item_to_add, size_t in_target
     // Look for an available index in the inner array
     size_t found_av = NULL_OFFSET;
     for (size_t i = 0; i < target_list->items.size; i++) {
-        ShapeDataInList current = arr_get(ShapeDataInList,target_list->items,i);
+        ColoredShapeInList current = arr_get(ColoredShapeInList,target_list->items,i);
         if (current.next == NULL_OFFSET
             && current.prev == NULL_OFFSET
             && i != target_list->starting_index) {
@@ -178,16 +178,16 @@ void list_insert_at(WList* target_list, ShapeData* item_to_add, size_t in_target
         }
     }
     // find the item of the list that will be replaced and its previous
-    ShapeDataInList* current = NULL;
+    ColoredShapeInList* current = NULL;
     size_t new_next = NULL_OFFSET;
     size_t new_prev = NULL_OFFSET;
     size_t current_index = target_list->starting_index;
     if (current_index != NULL_OFFSET) {
-        current = &arr_get(ShapeDataInList,target_list->items,current_index);
+        current = &arr_get(ColoredShapeInList,target_list->items,current_index);
         for (size_t i = 0; i < target_pos; i++) {
             current_index = current->next;
             if (current_index != NULL_OFFSET) {
-                current = &arr_get(ShapeDataInList,target_list->items,current_index);
+                current = &arr_get(ColoredShapeInList,target_list->items,current_index);
             }
         }
         new_next = current_index;
@@ -198,7 +198,7 @@ void list_insert_at(WList* target_list, ShapeData* item_to_add, size_t in_target
         }
     }
 
-    ShapeDataInList new_cube = {0};
+    ColoredShapeInList new_cube = {0};
     new_cube.item = *item_to_add;
     new_cube.prev = new_prev;
     new_cube.next = new_next;
@@ -208,8 +208,8 @@ void list_insert_at(WList* target_list, ShapeData* item_to_add, size_t in_target
         arr_append(target_list->items, new_cube);
         found_av = target_list->items.size - 1;
     }
-    if (new_prev != NULL_OFFSET) arr_get(ShapeDataInList,target_list->items,new_prev).next = found_av;
-    if (new_next != NULL_OFFSET) arr_get(ShapeDataInList,target_list->items,new_next).prev = found_av;
+    if (new_prev != NULL_OFFSET) arr_get(ColoredShapeInList,target_list->items,new_prev).next = found_av;
+    if (new_next != NULL_OFFSET) arr_get(ColoredShapeInList,target_list->items,new_next).prev = found_av;
     if (new_prev == NULL_OFFSET) target_list->starting_index = found_av;
     target_list->list_size++;
 }

@@ -11,7 +11,10 @@
         (float)(((rand() % 1000)/1000.0f*8)-4),\
         (float)(((rand() % 1000)/1000.0f*1)-0),\
         (float)(((rand() % 1000)/1000.0f*8)-4)\
-    };\
+    }\
+
+#define random_floats\
+    (float)(((rand() % 1000)/1000.0f*8)-4),(float)(((rand() % 1000)/1000.0f*1)-0),(float)(((rand() % 1000)/1000.0f*8)-4)
 
 int main(void) {
 
@@ -39,8 +42,8 @@ int main(void) {
     cubes_list.list_size = 0;
     // fill
     for (int i = 0; i < 10; i++) {
-        ShapeDataInList c = {0};
-        c.item = (ShapeData)random_position;
+        ColoredShapeInList c = {0};
+        c.item = (ColoredShape){random_floats, BLUE};
         if (i<=0) {
             c.prev = NULL_OFFSET;
         } else {
@@ -51,17 +54,18 @@ int main(void) {
         } else {
             c.next = i+1;
         }
-        arr_append(cubes_inner, c);
+        arr_append(cubes_list.items, c);
         cubes_list.list_size++;
     }
 
     cubes_list.starting_index = 0;
 
     // insert at position x
-    ShapeData to_add = {0};
+    ColoredShape to_add = {0};
     to_add.position = (Vector3)random_position;
+    to_add.color = RED;
     WList* target_list = &cubes_list;
-    size_t target_pos = 5;
+    size_t target_pos = 10;
     list_insert_at(target_list, &to_add, target_pos);
 
     // insert
@@ -104,7 +108,10 @@ int main(void) {
 
         for (size_t i = 0; i < circles.size; i++) {
             DrawSphere(arr_get(ShapeData,circles,i).position, 0.25f, DARKGREEN);
-            DrawCircle3D(Vector3Add(arr_get(ShapeData,circles,i).position,(Vector3){0.0,-0.25,0.0})
+            DrawCircle3D(
+                Vector3Multiply((Vector3){1.0,0.0,1.0},
+                Vector3Add(arr_get(ShapeData,circles,i).position,(Vector3){0.0,-0.25,0.0})
+                )
                 , 0.25f
                 , (Vector3){1,0,0}
                 ,90.0
@@ -112,6 +119,29 @@ int main(void) {
         }
 
         EndMode3D();
+
+        {
+            char str[3] = "xxx";
+            const int squareSize = 18;
+            const int padding    = 6;
+            const int startX     = 10;
+            const int startY     = 50;
+
+            size_t idx = cubes_list.starting_index;
+            for (size_t n = 0; n < cubes_list.list_size && idx != NULL_OFFSET; n++) {
+                ColoredShapeInList node = arr_get(ColoredShapeInList, cubes_list.items, idx);
+
+                int x = startX + (int)n * (squareSize + padding);
+                int y = startY;
+
+                DrawRectangle(x, y, squareSize, squareSize, node.item.color);
+                DrawRectangleLines(x, y, squareSize, squareSize, BLACK);
+                snprintf(str, sizeof(str), "%zu", idx);
+                DrawText(str, x-2 + squareSize / 2, y-2 + squareSize / 2, 10, BLACK);
+
+                idx = node.next;
+            }
+        }
 
         DrawText("Hello World from Raylib + CLion!", 10, 20, 20, BLACK);
 

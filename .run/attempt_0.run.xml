@@ -4,4 +4,7 @@
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>
   </configuration>
+  <configuration default="false" name="attempt_0" type="CMakeListConfigurationType" factoryName="CMakeListConfigurationFactory">
+    <method v="2" />
+  </configuration>
 </component>

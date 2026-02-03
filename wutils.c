@@ -161,10 +161,7 @@ void WMemClear() {
 /// LIST IMPLEMENTATION
 ///////////////////////////////////////////////////////
 
-void list_insert_at(WList* target_list, ColoredShape* item_to_add, size_t in_target_pos){
-
-    size_t target_pos = (in_target_pos >= target_list->list_size)
-    ? target_list->list_size : in_target_pos;
+void list_insert_at_size(WList* target_list, ColoredShape* item_to_add, size_t in_target_pos){
 
     // Look for an available index in the inner array
     size_t found_av = NULL_OFFSET;
@@ -175,27 +172,45 @@ void list_insert_at(WList* target_list, ColoredShape* item_to_add, size_t in_tar
             && i != target_list->starting_index) {
             found_av = i;
             break;
-        }
+            }
     }
+
     // find the item of the list that will be replaced and its previous
     ColoredShapeInList* current = NULL;
     size_t new_next = NULL_OFFSET;
     size_t new_prev = NULL_OFFSET;
-    size_t current_index = target_list->starting_index;
-    if (current_index != NULL_OFFSET) {
-        current = &arr_get(ColoredShapeInList,target_list->items,current_index);
-        for (size_t i = 0; i < target_pos; i++) {
-            current_index = current->next;
-            if (current_index != NULL_OFFSET) {
-                current = &arr_get(ColoredShapeInList,target_list->items,current_index);
-            }
-        }
-        new_next = current_index;
+
+    size_t target_pos = in_target_pos;
+    if (in_target_pos < target_list->list_size) {
+        size_t current_index = target_list->starting_index;
         if (current_index != NULL_OFFSET) {
-            if (current->prev != NULL_OFFSET) {
-                new_prev = current->prev;
+            current = &arr_get(ColoredShapeInList,target_list->items,current_index);
+            for (size_t i = 0; i < target_pos; i++) {
+                current_index = current->next;
+                if (current_index != NULL_OFFSET) {
+                    current = &arr_get(ColoredShapeInList,target_list->items,current_index);
+                }
+            }
+            new_next = current_index;
+            if (current_index != NULL_OFFSET) {
+                if (current->prev != NULL_OFFSET) {
+                    new_prev = current->prev;
+                }
             }
         }
+
+    } else {
+        size_t current_index = target_list->starting_index;
+        while (true) {
+            current = &arr_get(ColoredShapeInList,target_list->items,current_index);
+            if (current->next == NULL_OFFSET) {
+                current->next = found_av;
+                new_prev = current_index;
+                break;
+            } else {
+                current_index = current->next;
+            }
+        };
     }
 
     ColoredShapeInList new_cube = {0};

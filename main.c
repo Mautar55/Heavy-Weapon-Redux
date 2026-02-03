@@ -65,8 +65,17 @@ int main(void) {
     to_add.position = (Vector3)random_position;
     to_add.color = RED;
     WList* target_list = &cubes_list;
-    size_t target_pos = 10;
-    list_insert_at(target_list, &to_add, target_pos);
+    list_insert_at_size(target_list, &to_add, 10);
+
+    // insert at position x
+    to_add.position = (Vector3)random_position;
+    to_add.color = GREEN;
+    list_insert_at_size(target_list, &to_add, 0);
+
+    // insert at position x
+    to_add.position = (Vector3)random_position;
+    to_add.color = PINK;
+    list_insert_at_size(target_list, &to_add, 5);
 
     // insert
 

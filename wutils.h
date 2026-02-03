@@ -124,7 +124,7 @@ declare_list_item(ColoredShape)
     list.items = new_list;\
     list.item_size = sizeof(list_item(typeof(type)));\
 
-void list_insert_at(WList* target_list, ColoredShape* item_to_add, size_t target_pos);
+void list_insert_at_size(WList* target_list, ColoredShape* item_to_add, size_t target_pos);
 
 // insert at position
 // delete at position

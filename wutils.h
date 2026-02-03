@@ -104,6 +104,7 @@ static inline WMemRef* WMemRefFromOffset(wref ref)
 typedef struct {
     size_t list_size;
     size_t starting_index;
+    size_t item_size;
     WArray items;
 } WList;
 
@@ -118,13 +119,24 @@ declare_list_item(ColoredShape)
 
 // implementar en main.c
 // y despues pasar a macro
-#define list_new(label)\
-    WList list = {0};\
-    arr_new(new_list);\
-    list.items = new_list;\
-    list.item_size = sizeof(list_item(typeof(type)));\
+#define list_new(label, type)\
+    WList label = {0};\
+    do {\
+        arr_new( inner_arr_##label )\
+        label.items = inner_arr_##label;\
+        label.item_size = sizeof(type);\
+        label.starting_index = NULL_OFFSET;\
+        label.list_size = 0;\
+    } while(0)
 
-void list_insert_at_size(WList* target_list, ColoredShape* item_to_add, size_t target_pos);
+
+
+void list_insert_at(WList* target_list, void* item_to_add, size_t target_pos);
+void list_insert_first(WList* target_list, void* item_to_add);
+void list_insert_last(WList* target_list, void* item_to_add);
+void list_remove_at(WList* target_list, size_t in_target_pos);
+void list_remove_first(WList* target_list);
+void list_remove_last(WList* target_list);
 
 // insert at position
 // delete at position

@@ -31,17 +31,10 @@ int main(void) {
         arr_append(circles, c);
     }
 
-    // #define list_new(label)\
-    //     WList list = {0};\
-    //     arr_new(new_list);\
-    //     list.items = new_list;\
+    list_new(cubes_list, ColoredShape);
 
-    WList cubes_list = {0};
-    arr_new(cubes_inner)
-    cubes_list.items = cubes_inner;
-    cubes_list.list_size = 0;
     // fill
-    for (int i = 0; i < 10; i++) {
+    /*for (int i = 0; i < 10; i++) {
         ColoredShapeInList c = {0};
         c.item = (ColoredShape){random_floats, BLUE};
         if (i<=0) {
@@ -57,29 +50,31 @@ int main(void) {
         arr_append(cubes_list.items, c);
         cubes_list.list_size++;
     }
+    cubes_list.starting_index = 0;*/
 
-    cubes_list.starting_index = 0;
+    //list_insert_at(&cubes_list, &(ColoredShape){random_floats, LIME}, 0);
 
-    // insert at position x
+    for (int i = 0; i < 10; i++) {
+
+        list_insert_last(&cubes_list, &(ColoredShape){random_floats, BLUE});
+    }
+
     ColoredShape to_add = {0};
     to_add.position = (Vector3)random_position;
     to_add.color = RED;
     WList* target_list = &cubes_list;
-    list_insert_at_size(target_list, &to_add, 10);
+    list_insert_at(target_list, &to_add, 10);
 
-    // insert at position x
     to_add.position = (Vector3)random_position;
     to_add.color = GREEN;
-    list_insert_at_size(target_list, &to_add, 0);
+    list_insert_at(target_list, &to_add, 0);
 
-    // insert at position x
     to_add.position = (Vector3)random_position;
     to_add.color = PINK;
-    list_insert_at_size(target_list, &to_add, 5);
+    list_insert_at(target_list, &to_add, 5);
 
-    // insert
-
-    // implement push, append, insert at, remove
+    list_remove_first(target_list);
+    list_remove_last(target_list);
 
     Camera camera = { 0 };
     camera.position = (Vector3){ 0.0f, 2.0f, 4.0f };    // Camera position

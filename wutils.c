@@ -161,14 +161,21 @@ void WMemClear() {
 /// LIST IMPLEMENTATION
 ///////////////////////////////////////////////////////
 
-void list_insert_at_size(WList* target_list, ColoredShape* item_to_add, size_t in_target_pos){
+void list_insert_at(WList* target_list, void* item_to_add, size_t in_target_pos){
+
+    size_t full_item_size = target_list->item_size + sizeof(size_t) * 2; // item + prev + next
+
+    // Helper to get pointer to element in items array
+    #define LIST_ITEM_PTR(list, index) ((char*)WMemRefFromOffset((list)->items.items_ref)->ptr + (index) * full_item_size)
+    #define GET_PREV(ptr) (*(size_t*)((char*)(ptr) + target_list->item_size))
+    #define GET_NEXT(ptr) (*(size_t*)((char*)(ptr) + target_list->item_size + sizeof(size_t)))
 
     // Look for an available index in the inner array
     size_t found_av = NULL_OFFSET;
     for (size_t i = 0; i < target_list->items.size; i++) {
-        ColoredShapeInList current = arr_get(ColoredShapeInList,target_list->items,i);
-        if (current.next == NULL_OFFSET
-            && current.prev == NULL_OFFSET
+        void* current_ptr = LIST_ITEM_PTR(target_list, i);
+        if (GET_NEXT(current_ptr) == NULL_OFFSET
+            && GET_PREV(current_ptr) == NULL_OFFSET
             && i != target_list->starting_index) {
             found_av = i;
             break;
@@ -176,58 +183,136 @@ void list_insert_at_size(WList* target_list, ColoredShape* item_to_add, size_t i
     }
 
     // find the item of the list that will be replaced and its previous
-    ColoredShapeInList* current = NULL;
     size_t new_next = NULL_OFFSET;
     size_t new_prev = NULL_OFFSET;
 
-    size_t target_pos = in_target_pos;
-    if (in_target_pos < target_list->list_size) {
+    if (in_target_pos < target_list->list_size && target_list->starting_index != NULL_OFFSET) {
         size_t current_index = target_list->starting_index;
         if (current_index != NULL_OFFSET) {
-            current = &arr_get(ColoredShapeInList,target_list->items,current_index);
-            for (size_t i = 0; i < target_pos; i++) {
-                current_index = current->next;
+            void* current_ptr = LIST_ITEM_PTR(target_list, current_index);
+            for (size_t i = 0; i < in_target_pos; i++) {
+                current_index = GET_NEXT(current_ptr);
                 if (current_index != NULL_OFFSET) {
-                    current = &arr_get(ColoredShapeInList,target_list->items,current_index);
+                    current_ptr = LIST_ITEM_PTR(target_list, current_index);
                 }
             }
             new_next = current_index;
-            if (current_index != NULL_OFFSET) {
-                if (current->prev != NULL_OFFSET) {
-                    new_prev = current->prev;
-                }
-            }
+            new_prev = GET_PREV(current_ptr);
         }
-
-    } else {
-        size_t current_index = target_list->starting_index;
+    } else if (in_target_pos == target_list->list_size && target_list->starting_index != NULL_OFFSET) {
         if (target_list->list_size > 0) {
-            while (true) {
-                current = &arr_get(ColoredShapeInList,target_list->items,current_index);
-                if (current->next == NULL_OFFSET) {
-                    current->next = found_av;
-                    new_prev = current_index;
-                    break;
-                } else {
-                    current_index = current->next;
-                }
-            };
+            size_t current_index = target_list->starting_index;
+            void* current_ptr = LIST_ITEM_PTR(target_list, current_index);
+            while (GET_NEXT(current_ptr) != NULL_OFFSET) {
+                current_index = GET_NEXT(current_ptr);
+                current_ptr = LIST_ITEM_PTR(target_list, current_index);
+            }
+            new_prev = current_index;
         }
-
     }
 
-    ColoredShapeInList new_cube = {0};
-    new_cube.item = *item_to_add;
-    new_cube.prev = new_prev;
-    new_cube.next = new_next;
-    if (found_av != NULL_OFFSET) {
-        arr_set(target_list->items, found_av, new_cube);
+    if (found_av == NULL_OFFSET) {
+        // Grow array if needed
+        if (target_list->items.size >= target_list->items.capacity) {
+            if (target_list->items.capacity == 0) target_list->items.capacity = 256;
+            else target_list->items.capacity *= 2;
+            target_list->items.items_ref = WMemRealloc(target_list->items.items_ref, target_list->items.capacity * full_item_size);
+        }
+        found_av = target_list->items.size++;
+    }
+
+    void* target_ptr = LIST_ITEM_PTR(target_list, found_av);
+    memcpy(target_ptr, item_to_add, target_list->item_size);
+    GET_PREV(target_ptr) = new_prev;
+    GET_NEXT(target_ptr) = new_next;
+
+    if (new_prev != NULL_OFFSET) {
+        GET_NEXT(LIST_ITEM_PTR(target_list, new_prev)) = found_av;
     } else {
-        arr_append(target_list->items, new_cube);
-        found_av = target_list->items.size - 1;
+        target_list->starting_index = found_av;
     }
-    if (new_prev != NULL_OFFSET) arr_get(ColoredShapeInList,target_list->items,new_prev).next = found_av;
-    if (new_next != NULL_OFFSET) arr_get(ColoredShapeInList,target_list->items,new_next).prev = found_av;
-    if (new_prev == NULL_OFFSET) target_list->starting_index = found_av;
+
+    if (new_next != NULL_OFFSET) {
+        GET_PREV(LIST_ITEM_PTR(target_list, new_next)) = found_av;
+    }
+
     target_list->list_size++;
+
+    #undef LIST_ITEM_PTR
+    #undef GET_PREV
+    #undef GET_NEXT
 }
+
+void list_remove_at(WList* target_list, size_t in_target_pos)
+{
+    if (!target_list) return;
+    if (target_list->list_size == 0) return;
+    if (in_target_pos >= target_list->list_size) return;
+    if (target_list->starting_index == NULL_OFFSET) return;
+
+    size_t full_item_size = target_list->item_size + sizeof(size_t) * 2; // item + prev + next
+
+    #define LIST_ITEM_PTR(list, index) ((char*)WMemRefFromOffset((list)->items.items_ref)->ptr + (index) * full_item_size)
+    #define GET_PREV(ptr) (*(size_t*)((char*)(ptr) + target_list->item_size))
+    #define GET_NEXT(ptr) (*(size_t*)((char*)(ptr) + target_list->item_size + sizeof(size_t)))
+
+    // Walk to the node at logical position in_target_pos
+    size_t current_index = target_list->starting_index;
+    void* current_ptr = LIST_ITEM_PTR(target_list, current_index);
+
+    for (size_t i = 0; i < in_target_pos; i++) {
+        size_t next_index = GET_NEXT(current_ptr);
+        if (next_index == NULL_OFFSET) {
+            // List structure is inconsistent with list_size; bail safely.
+            return;
+        }
+        current_index = next_index;
+        current_ptr = LIST_ITEM_PTR(target_list, current_index);
+    }
+
+    size_t prev_index = GET_PREV(current_ptr);
+    size_t next_index = GET_NEXT(current_ptr);
+
+    // Bridge neighbors around current
+    if (prev_index != NULL_OFFSET) {
+        void* prev_ptr = LIST_ITEM_PTR(target_list, prev_index);
+        GET_NEXT(prev_ptr) = next_index;
+    } else {
+        // Removing head
+        target_list->starting_index = next_index;
+    }
+
+    if (next_index != NULL_OFFSET) {
+        void* next_ptr = LIST_ITEM_PTR(target_list, next_index);
+        GET_PREV(next_ptr) = prev_index;
+    }
+
+    // Mark this slot as available (matches insert_at free-slot check)
+    GET_PREV(current_ptr) = NULL_OFFSET;
+    GET_NEXT(current_ptr) = NULL_OFFSET;
+
+    // Optional: wipe item payload (helps debugging; not required)
+    // memset(current_ptr, 0, target_list->item_size);
+
+    target_list->list_size--;
+
+    #undef LIST_ITEM_PTR
+    #undef GET_PREV
+    #undef GET_NEXT
+}
+
+void list_insert_first(WList* target_list, void* item_to_add) {
+    list_insert_at(target_list, item_to_add, 0);
+}
+
+void list_insert_last(WList *target_list, void *item_to_add) {
+    list_insert_at(target_list, item_to_add, target_list->list_size);
+}
+
+void list_remove_first(WList* target_list) {
+    list_remove_at(target_list, 0);
+};
+
+void list_remove_last(WList* target_list) {
+    list_remove_at(target_list, target_list->list_size - 1);
+};

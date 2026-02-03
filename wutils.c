@@ -12,7 +12,6 @@ static WMemRef* WMemGetRefArray() {
 }
 
 static void* WMemGetPoolStart() {
-    if (state.start == NULL) return NULL;
     return (char*)state.start + (state.references_capacity * sizeof(WMemRef));
 }
 

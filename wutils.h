@@ -60,6 +60,11 @@ typedef struct {
         if (_i >= (array).size) (array).size = _i + 1;\
     } while (0)
 
+#define arr_clear(array)\
+    (array).size = 0;\
+    (array).capacity=0;\
+    WMemClear(array.items_ref);
+
 // Heap memory management
 
 struct WMemState {
@@ -129,7 +134,16 @@ declare_list_item(ColoredShape)
         label.list_size = 0;\
     } while(0)
 
-
+#define foreach_list(item_type, item_label, target_list, operations)\
+size_t idx = target_list.starting_index;\
+for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
+    item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
+    item_type item_label = node.item;\
+    \
+    operations\
+    \
+    idx = node.next;\
+};
 
 void list_insert_at(WList* target_list, void* item_to_add, size_t target_pos);
 void list_insert_first(WList* target_list, void* item_to_add);

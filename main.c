@@ -33,27 +33,6 @@ int main(void) {
 
     list_new(cubes_list, ColoredShape);
 
-    // fill
-    /*for (int i = 0; i < 10; i++) {
-        ColoredShapeInList c = {0};
-        c.item = (ColoredShape){random_floats, BLUE};
-        if (i<=0) {
-            c.prev = NULL_OFFSET;
-        } else {
-            c.prev = i-1;
-        }
-        if (i>=10-1) {
-            c.next = NULL_OFFSET;
-        } else {
-            c.next = i+1;
-        }
-        arr_append(cubes_list.items, c);
-        cubes_list.list_size++;
-    }
-    cubes_list.starting_index = 0;*/
-
-    //list_insert_at(&cubes_list, &(ColoredShape){random_floats, LIME}, 0);
-
     for (int i = 0; i < 10; i++) {
 
         list_insert_last(&cubes_list, &(ColoredShape){random_floats, BLUE});
@@ -131,25 +110,17 @@ int main(void) {
             const int startX     = 10;
             const int startY     = 50;
 
-            size_t idx = cubes_list.starting_index;
-            for (size_t n = 0; n < cubes_list.list_size && idx != NULL_OFFSET; n++) {
-                ColoredShapeInList node = arr_get(ColoredShapeInList, cubes_list.items, idx);
-
+            foreach_list(ColoredShape, shape, cubes_list,
                 int x = startX + (int)n * (squareSize + padding);
                 int y = startY;
-
                 DrawRectangle(x, y, squareSize, squareSize, node.item.color);
                 DrawRectangleLines(x, y, squareSize, squareSize, BLACK);
                 snprintf(str, sizeof(str), "%zu", idx);
                 DrawText(str, x-2 + squareSize / 2, y-2 + squareSize / 2, 10, BLACK);
-
-                idx = node.next;
-            }
+            );
         }
 
         DrawText("Hello World from Raylib + CLion!", 10, 20, 20, BLACK);
-
-
         
         EndDrawing();
     }

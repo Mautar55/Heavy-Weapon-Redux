@@ -145,6 +145,37 @@ for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
     idx = node.next;\
 };
 
+#define foreach_list_inverted(item_type, item_label, target_list, operations)\
+{\
+size_t idx = target_list.starting_index;\
+for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
+    item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
+    item_type item_label = node.item;\
+    idx = node.next;\
+    };\
+    for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
+    item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
+    item_type item_label = node.item;\
+    \
+    operations\
+    \
+    idx = node.prev;\
+    };\
+}
+
+//if (GET_NEXT(current_ptr) == NULL_OFFSET
+ //           && GET_PREV(current_ptr) == NULL_OFFSET
+  //          && i != target_list->starting_index)
+
+#define foreach_list_orderless(item_type, item_label, target_list, operations)\
+for (size_t n = 0; n < target_list.items.capacity; n++) {\
+    item_type##InList node = arr_get(item_type##InList, target_list.items, n);\
+    if (!(node.next != NULL_OFFSET && node.next != NULL_OFFSET)) {\
+        item_type item_label = node.item;\
+        operations\
+    }\
+};
+
 void list_insert_at(WList* target_list, void* item_to_add, size_t target_pos);
 void list_insert_first(WList* target_list, void* item_to_add);
 void list_insert_last(WList* target_list, void* item_to_add);

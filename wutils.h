@@ -123,8 +123,6 @@ typedef struct {
 
 declare_list_item(ColoredShape)
 
-// implementar en main.c
-// y despues pasar a macro
 #define list_new(label, type)\
     WList label = {0};\
     do {\
@@ -149,14 +147,7 @@ for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
 
 #define foreach_list_inverted(item_type, item_label, target_list, operations)\
 {\
-size_t idx = target_list.starting_index;\
-for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
-    item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
-    item_type item_label = node.item;\
-    if (node.next != NULL_OFFSET) {\
-        idx = node.next;\
-    };\
-    };\
+size_t idx = target_list.last_index;\
 for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
     item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
     item_type item_label = node.item;\

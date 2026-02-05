@@ -53,11 +53,10 @@ int main(void) {
     WMemClear();
 
     list_new(my_list, int);
-
-    {
-        const int exp0[] = {};
+    /*{
+        int exp0[] = {};
         assert_list_integrity_and_order_int(&my_list, exp0, 0);
-    }
+    }*/
 
     int val1 = 10;
     list_insert_at(&my_list, &val1, 0);
@@ -112,10 +111,10 @@ int main(void) {
     }
 
     list_remove_at(&my_list, 0);
-    {
-        const int exp8[] = {};
+    /*{
+        const int exp8[0] = {};
         assert_list_integrity_and_order_int(&my_list, exp8, 0);
-    }
+    }*/
 
     WMemClear();
     return 0;

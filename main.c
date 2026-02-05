@@ -128,16 +128,6 @@ int main(void) {
                 snprintf(str, sizeof(str), "%zu", idx);
                 DrawText(str, x-2 + squareSize / 2, y-2 + squareSize / 2, 10, BLACK);
             );
-
-            startY = 150;
-            foreach_list_orderless(ColoredShape, shape, cubes_list,
-                int x = startX + (int)n * (squareSize + padding);
-                int y = startY;
-                DrawRectangle(x, y, squareSize, squareSize, node.item.color);
-                DrawRectangleLines(x, y, squareSize, squareSize, BLACK);
-                snprintf(str, sizeof(str), "%zu", idx);
-                DrawText(str, x-2 + squareSize / 2, y-2 + squareSize / 2, 10, BLACK);
-            );
         }
 
         DrawText("Hello World from Raylib + CLion!", 10, 20, 20, BLACK);

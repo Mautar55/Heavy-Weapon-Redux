@@ -109,6 +109,7 @@ static inline WMemRef* WMemRefFromOffset(wref ref)
 typedef struct {
     size_t list_size;
     size_t starting_index;
+    size_t last_index;
     size_t item_size;
     WArray items;
 } WList;
@@ -131,6 +132,7 @@ declare_list_item(ColoredShape)
         label.items = inner_arr_##label;\
         label.item_size = sizeof(type);\
         label.starting_index = NULL_OFFSET;\
+        label.last_index = NULL_OFFSET;\
         label.list_size = 0;\
     } while(0)
 
@@ -151,9 +153,11 @@ size_t idx = target_list.starting_index;\
 for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
     item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
     item_type item_label = node.item;\
-    idx = node.next;\
+    if (node.next != NULL_OFFSET) {\
+        idx = node.next;\
     };\
-    for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
+    };\
+for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
     item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
     item_type item_label = node.item;\
     \
@@ -162,19 +166,6 @@ for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
     idx = node.prev;\
     };\
 }
-
-//if (GET_NEXT(current_ptr) == NULL_OFFSET
- //           && GET_PREV(current_ptr) == NULL_OFFSET
-  //          && i != target_list->starting_index)
-
-#define foreach_list_orderless(item_type, item_label, target_list, operations)\
-for (size_t n = 0; n < target_list.items.capacity; n++) {\
-    item_type##InList node = arr_get(item_type##InList, target_list.items, n);\
-    if (!(node.next != NULL_OFFSET && node.next != NULL_OFFSET)) {\
-        item_type item_label = node.item;\
-        operations\
-    }\
-};
 
 void list_insert_at(WList* target_list, void* item_to_add, size_t target_pos);
 void list_insert_first(WList* target_list, void* item_to_add);

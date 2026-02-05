@@ -198,15 +198,7 @@ void list_insert_at(WList* target_list, void* item_to_add, size_t in_target_pos)
             new_prev = GET_PREV(current_ptr);
         }
     } else if (in_target_pos == target_list->list_size && target_list->starting_index != NULL_OFFSET) {
-        if (target_list->list_size > 0) {
-            size_t current_index = target_list->starting_index;
-            void* current_ptr = LIST_ITEM_PTR(target_list, current_index);
-            while (GET_NEXT(current_ptr) != NULL_OFFSET) {
-                current_index = GET_NEXT(current_ptr);
-                current_ptr = LIST_ITEM_PTR(target_list, current_index);
-            }
-            new_prev = current_index;
-        }
+        new_prev = target_list->last_index;
     }
 
     if (found_av == NULL_OFFSET) {
@@ -232,6 +224,8 @@ void list_insert_at(WList* target_list, void* item_to_add, size_t in_target_pos)
 
     if (new_next != NULL_OFFSET) {
         GET_PREV(LIST_ITEM_PTR(target_list, new_next)) = found_av;
+    } else {
+        target_list->last_index = found_av;
     }
 
     target_list->list_size++;
@@ -283,6 +277,9 @@ void list_remove_at(WList* target_list, size_t in_target_pos)
     if (next_index != NULL_OFFSET) {
         void* next_ptr = LIST_ITEM_PTR(target_list, next_index);
         GET_PREV(next_ptr) = prev_index;
+    } else {
+        // Removing tail
+        target_list->last_index = prev_index;
     }
 
     // Mark this slot as available (matches insert_at free-slot check)

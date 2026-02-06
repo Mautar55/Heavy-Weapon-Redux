@@ -4,7 +4,9 @@ project(attempt_0 C CXX)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(attempt_0 src/main.c src/wutils.h src/wutils.c)
+add_executable(attempt_0 src/main.c src/wutils.h src/wutils.c
+        src/random_shapes.h
+        src/random_shapes.c)
 add_executable(test src/test.c src/wutils.h src/wutils.c)
 
 include(FetchContent)

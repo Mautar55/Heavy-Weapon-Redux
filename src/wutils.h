@@ -5,18 +5,20 @@
 #define NULL_OFFSET ((size_t)-1)
 #define NULLWREF (wref){NULL_OFFSET}
 #define IS_NULLWREF .offset==NULL_OFFSET
+
+#define random_position\
+    {\
+    (float)((GetRandomValue(0,1000)/1000.0f*8)-4),\
+    (float)((GetRandomValue(0,1000)/1000.0f*1)-0),\
+    (float)((GetRandomValue(0,1000)/1000.0f*8)-4)\
+    }
+
+#define random_floats\
+    (float)((GetRandomValue(0,1000)/1000.0f*8)-4),(float)((GetRandomValue(0,1000)/1000.0f*1)-0),(float)((GetRandomValue(0,1000)/1000.0f*8)-4)
+
 typedef struct {
     size_t offset;
 }wref;
-
-typedef struct {
-    Vector3 position;
-} ShapeData;
-
-typedef struct {
-    Vector3 position;
-    Color color;
-} ColoredShape;
 
 typedef struct {
     wref items_ref;
@@ -37,14 +39,14 @@ typedef struct {
             else (array).capacity *= 2;\
             (array).items_ref = WMemRealloc((array).items_ref, (array).capacity * sizeof(new_item));\
         }\
-        WMemRef *ref = WMemRefFromOffset(array.items_ref);\
-        size_t dest_i = array.size++;\
+        WMemRef *ref = WMemRefFromOffset((array).items_ref);\
+        size_t dest_i = (array).size++;\
         size_t elem_size = sizeof new_item;\
         memcpy((char*)ref->ptr + dest_i * elem_size, &new_item, elem_size);\
     } while(0)
 
 #define arr_get(type_cast, array, index)\
-    ((type_cast*)WMemRefFromOffset(array.items_ref)->ptr)[index]\
+    ((type_cast*)WMemRefFromOffset((array).items_ref)->ptr)[index]\
 
 #define arr_set(array, index, new_item)\
     do {\
@@ -121,8 +123,6 @@ typedef struct {
         size_t next;\
     } type##InList;
 
-declare_list_item(ColoredShape)
-
 #define list_new(label, type)\
     WList label = {0};\
     do {\
@@ -135,9 +135,9 @@ declare_list_item(ColoredShape)
     } while(0)
 
 #define foreach_list(item_type, item_label, target_list, operations)\
-size_t idx = target_list.starting_index;\
-for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
-    item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
+size_t idx = (target_list).starting_index;\
+for (size_t n = 0; n < (target_list).list_size && idx != NULL_OFFSET; n++) {\
+    item_type##InList node = arr_get(item_type##InList, (target_list).items, idx);\
     item_type item_label = node.item;\
     \
     operations\
@@ -147,9 +147,9 @@ for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
 
 #define foreach_list_inverted(item_type, item_label, target_list, operations)\
 {\
-size_t idx = target_list.last_index;\
-for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
-    item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
+size_t idx = (target_list).last_index;\
+for (size_t n = 0; n < (target_list).list_size && idx != NULL_OFFSET; n++) {\
+    item_type##InList node = arr_get(item_type##InList, (target_list).items, idx);\
     item_type item_label = node.item;\
     \
     operations\

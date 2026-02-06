@@ -2,58 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#include "random_shapes.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "wutils.h"
-
-#define random_position\
-    {\
-        (float)(((rand() % 1000)/1000.0f*8)-4),\
-        (float)(((rand() % 1000)/1000.0f*1)-0),\
-        (float)(((rand() % 1000)/1000.0f*8)-4)\
-    }\
-
-#define random_floats\
-    (float)(((rand() % 1000)/1000.0f*8)-4),(float)(((rand() % 1000)/1000.0f*1)-0),(float)(((rand() % 1000)/1000.0f*8)-4)
 
 int main(void) {
 
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(800, 600, "Hello Raylib");
-    srand(time(NULL));
+    SetRandomSeed(time(NULL));
 
-    //CircleDataArray circles = {0};
-    arr_new(circles)
-
-    for (int i = 0; i < 20; i++) {
-        ShapeData c = random_position;
-        arr_append(circles, c);
-    }
-
-    list_new(cubes_list, ColoredShape);
-
-    for (int i = 0; i < 10; i++) {
-
-        list_insert_last(&cubes_list, &(ColoredShape){random_floats, BLUE});
-    }
-
-    ColoredShape to_add = {0};
-    to_add.position = (Vector3)random_position;
-    to_add.color = RED;
-    WList* target_list = &cubes_list;
-    list_insert_at(target_list, &to_add, 10);
-
-    to_add.position = (Vector3)random_position;
-    to_add.color = GREEN;
-    list_insert_at(target_list, &to_add, 0);
-
-    to_add.position = (Vector3)random_position;
-    to_add.color = PINK;
-    list_insert_at(target_list, &to_add, 5);
-
-    list_remove_first(target_list);
-    list_remove_last(target_list);
+    InitializeRandomShapes();
 
     Camera camera = { 0 };
     camera.position = (Vector3){ 0.0f, 2.0f, 4.0f };    // Camera position
@@ -75,11 +37,10 @@ int main(void) {
         UpdateCamera(&camera, CAMERA_FIRST_PERSON);
 
         if (IsKeyPressed(KEY_K)) {
-            ShapeData c = random_position;
-            arr_append(circles, c);
+            AddRandomShape();
         }
         if (IsKeyPressed(KEY_L)) {
-            if (circles.size > 0) circles.size--;
+            RemoveLastShape();
         }
 
         BeginDrawing();
@@ -89,46 +50,11 @@ int main(void) {
 
         DrawGrid(10, 1.0f);
 
-        for (size_t i = 0; i < circles.size; i++) {
-            DrawSphere(arr_get(ShapeData,circles,i).position, 0.25f, DARKGREEN);
-            DrawCircle3D(
-                Vector3Multiply((Vector3){1.0,0.0,1.0},
-                Vector3Add(arr_get(ShapeData,circles,i).position,(Vector3){0.0,-0.25,0.0})
-                )
-                , 0.25f
-                , (Vector3){1,0,0}
-                ,90.0
-                , DARKGRAY);
-        }
+        DrawRandomShapes3D();
 
         EndMode3D();
 
-        {
-            char str[3] = "xxx";
-            const int squareSize = 18;
-            const int padding    = 6;
-            const int startX     = 10;
-            int startY     = 50;
-
-            foreach_list(ColoredShape, shape, cubes_list,
-                int x = startX + (int)n * (squareSize + padding);
-                int y = startY;
-                DrawRectangle(x, y, squareSize, squareSize, node.item.color);
-                DrawRectangleLines(x, y, squareSize, squareSize, BLACK);
-                snprintf(str, sizeof(str), "%zu", idx);
-                DrawText(str, x-2 + squareSize / 2, y-2 + squareSize / 2, 10, BLACK);
-            );
-
-            startY = 100;
-            foreach_list_inverted(ColoredShape, shape, cubes_list,
-                int x = startX + (int)n * (squareSize + padding);
-                int y = startY;
-                DrawRectangle(x, y, squareSize, squareSize, node.item.color);
-                DrawRectangleLines(x, y, squareSize, squareSize, BLACK);
-                snprintf(str, sizeof(str), "%zu", idx);
-                DrawText(str, x-2 + squareSize / 2, y-2 + squareSize / 2, 10, BLACK);
-            );
-        }
+        DrawRandomShapes2D();
 
         DrawText("Hello World from Raylib + CLion!", 10, 20, 20, BLACK);
         

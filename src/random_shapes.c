@@ -52,6 +52,15 @@ void AddRandomShape() {
 };
 void RemoveLastShape() {
     if (circles.size > 0) circles.size--;
+}
+
+void RandomShapes_CheckKeysPressed() {
+    if (IsKeyPressed(KEY_K)) {
+        AddRandomShape();
+    }
+    if (IsKeyPressed(KEY_L)) {
+        RemoveLastShape();
+    }
 };
 void DrawRandomShapes3D() {
     for (size_t i = 0; i < circles.size; i++) {

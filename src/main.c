@@ -36,12 +36,7 @@ int main(void) {
         //----------------------------------------------------------------------------------
         UpdateCamera(&camera, CAMERA_FIRST_PERSON);
 
-        if (IsKeyPressed(KEY_K)) {
-            AddRandomShape();
-        }
-        if (IsKeyPressed(KEY_L)) {
-            RemoveLastShape();
-        }
+        RandomShapes_CheckKeysPressed();
 
         BeginDrawing();
         ClearBackground(RAYWHITE);

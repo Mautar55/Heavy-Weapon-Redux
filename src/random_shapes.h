@@ -13,5 +13,6 @@ typedef struct {
 void InitializeRandomShapes();
 void AddRandomShape();
 void RemoveLastShape();
+void RandomShapes_CheckKeysPressed();
 void DrawRandomShapes2D();
 void DrawRandomShapes3D();

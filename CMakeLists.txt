@@ -4,8 +4,8 @@ project(attempt_0 C CXX)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(attempt_0 main.c wutils.h wutils.c)
-add_executable(test test.c wutils.h wutils.c)
+add_executable(attempt_0 src/main.c src/wutils.h src/wutils.c)
+add_executable(test src/test.c src/wutils.h src/wutils.c)
 
 target_link_libraries(test PRIVATE raylib)
 find_package(raylib CONFIG REQUIRED)

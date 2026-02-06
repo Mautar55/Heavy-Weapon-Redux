@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <stddef.h>
-#include "wutils.h"
+#include "../wutils.h"
 
 static void *list_item_ptr(const WList *list, size_t index) {
     const size_t full_item_size = list->item_size + sizeof(size_t) * 2; // item + prev + next

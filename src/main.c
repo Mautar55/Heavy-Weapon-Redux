@@ -7,6 +7,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "wutils.h"
+#include "generated_assets.h"
 
 int main(void) {
 

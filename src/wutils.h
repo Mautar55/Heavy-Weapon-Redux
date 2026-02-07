@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "raylib.h"
 
+
 #define NULL_OFFSET ((size_t)-1)
 #define NULLWREF (wref){NULL_OFFSET}
 #define IS_NULLWREF .offset==NULL_OFFSET
@@ -66,6 +67,30 @@ typedef struct {
     (array).size = 0;\
     (array).capacity=0;\
     WMemClear(array.items_ref);
+
+#define arr_append_str(array, append_str)\
+do {\
+const char *_src = (const char*)(append_str);\
+if (_src == NULL) break;\
+size_t _src_len = strlen(_src);\
+size_t _dst_start = (array).size;\
+if (_dst_start > 0) {\
+WMemRef *_ref0 = WMemRefFromOffset((array).items_ref);\
+char *_buf0 = (char*)_ref0->ptr;\
+if (_buf0[_dst_start - 1] == '\0') _dst_start--; /* overwrite existing terminator */\
+}\
+size_t _needed = _dst_start + _src_len + 1; /* +1 for '\0' */\
+if (_needed > (array).capacity) {\
+if ((array).capacity == 0) (array).capacity = 256;\
+while (_needed > (array).capacity) (array).capacity *= 2;\
+(array).items_ref = WMemRealloc((array).items_ref, (array).capacity * sizeof(char));\
+}\
+WMemRef *_ref = WMemRefFromOffset((array).items_ref);\
+char *_buf = (char*)_ref->ptr;\
+memcpy(_buf + _dst_start, _src, _src_len);\
+_buf[_dst_start + _src_len] = '\0';\
+(array).size = _dst_start + _src_len + 1;\
+} while(0)
 
 // Heap memory management
 

@@ -8,6 +8,7 @@ add_executable(attempt_0 src/main.c src/wutils.h src/wutils.c
         src/random_shapes.h
         src/random_shapes.c)
 add_executable(test src/test.c src/wutils.h src/wutils.c)
+add_executable(asset_gen src/asset_gen.c src/wutils.h src/wutils.c)
 
 include(FetchContent)
 
@@ -24,5 +25,6 @@ set(BUILD_GAMES    OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(raylib)
 
 # find_package(raylib CONFIG REQUIRED)
+target_link_libraries(asset_gen PRIVATE raylib)
 target_link_libraries(test PRIVATE raylib)
 target_link_libraries(attempt_0 PRIVATE raylib)

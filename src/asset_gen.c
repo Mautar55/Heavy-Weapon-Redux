@@ -17,6 +17,19 @@ char* replace_non_alnum(char *s, char replacement)
     }
     return s;
 }
+
+char* replace_characters(char *s, char find, char replacement)
+{
+    if (!s) return NULL;
+
+    for (char *p = s; *p; ++p)
+    {
+        unsigned char ch = (unsigned char)*p;   // important for ctype functions
+        if (ch==find)
+            *p = replacement;
+    }
+    return s;
+}
 #define MAX_FILEPATH_SIZE 1024
 
 typedef struct {
@@ -117,13 +130,14 @@ void CreateAssetsReferenceFile(void)
     arr_new(contents);
     arr_append_str(contents, "#pragma once\n\n");
     foreach_list(AssetPath, i, file_paths,
+        replace_characters(i.path, '\\', '/');
         char this_file_name[MAX_FILEPATH_SIZE] = {0};
         strcpy_s(this_file_name, MAX_FILEPATH_SIZE, i.path);
         replace_non_alnum(this_file_name, '_');
-        char part1[] = "extern const char * asset_";
+        char part1[] = "extern const char * ass_";
         arr_append_str(contents, part1);
         arr_append_str(contents, this_file_name);
-        arr_append_str(contents, " = \"");
+        arr_append_str(contents, " = \"../assets/");
         arr_append_str(contents, i.path);
         arr_append_str(contents, "\";\n");
     );

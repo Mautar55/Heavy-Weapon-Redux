@@ -18,6 +18,8 @@ int main(void) {
 
     InitializeRandomShapes();
 
+    
+
     Camera camera = { 0 };
     camera.position = (Vector3){ 0.0f, 2.0f, 4.0f };    // Camera position
     camera.target = (Vector3){ 0.0f, 2.0f, 0.0f };      // Camera looking at point

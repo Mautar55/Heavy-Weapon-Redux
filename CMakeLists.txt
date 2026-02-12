@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_executable(attempt_0 src/main.c src/wutils.h src/wutils.c
         src/random_shapes.h
-        src/random_shapes.c)
+        src/random_shapes.c
+        src/wfonts.h
+        src/game_utils.h)
 add_executable(test src/test.c src/wutils.h src/wutils.c)
 add_executable(asset_gen src/asset_gen.c src/wutils.h src/wutils.c)
 

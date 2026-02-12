@@ -8,56 +8,72 @@
 #include "raymath.h"
 #include "wutils.h"
 #include "generated_assets.h"
+#include "wfonts.h"
+#include "game_utils.h"
 
 int main(void) {
 
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(800, 600, "Hello Raylib");
+    Vector2 ReferenceWindowSize = {800, 480};
+    InitWindow(ReferenceWindowSize.x, ReferenceWindowSize.y, "Hello Raylib");
     SetRandomSeed(time(NULL));
 
-    InitializeRandomShapes();
-
-    
-
-    Camera camera = { 0 };
-    camera.position = (Vector3){ 0.0f, 2.0f, 4.0f };    // Camera position
-    camera.target = (Vector3){ 0.0f, 2.0f, 0.0f };      // Camera looking at point
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };          // Camera up vector (rotation towards target)
-    camera.fovy = 60.0f;                                // Camera field-of-view Y
-    camera.projection = CAMERA_PERSPECTIVE;             // Camera projection type
-
-    DisableCursor();                    // Limit cursor to relative movement inside the window
+    Camera2D camera = { 0 };
+    camera.offset = (Vector2){ 0.0f, 0.0f };    // Camera position
+    camera.target = (Vector2){ 0.0f, 0.0f };      // Camera looking at point
+    camera.rotation = 0.0f;          // Camera up vector (rotation towards target)
+    camera.zoom = 1.0f;  // Camera field-of-view Y
 
     SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
-    //--------------------------------------------------------------------------------------
 
-    // Main game loop
+    Image Tank = LoadImage(ass_tank_png);
+    Texture2D texTank = LoadTextureFromImage(Tank);
+    SetTextureFilter(texTank, TEXTURE_FILTER_BILINEAR);
+    UnloadImage(Tank);
+
+    LoadFonts(1.0f);
+
+    bool pendingResolutionRefresh = false;
     while (!WindowShouldClose())        // Detect window close button or ESC key
     {
-        // Update
-        //----------------------------------------------------------------------------------
-        UpdateCamera(&camera, CAMERA_FIRST_PERSON);
+        const float refW = ReferenceWindowSize.x;
+        const float refH = ReferenceWindowSize.y;
 
-        RandomShapes_CheckKeysPressed();
+        const float rw = (float)GetRenderWidth();
+        const float rh = (float)GetRenderHeight();
+
+        const float viewScale = Min(rw / refW, rh / refH);
+
+        if (IsWindowResized()) {
+            pendingResolutionRefresh = true;
+        } else {
+            if (pendingResolutionRefresh) {
+                UnloadFonts();
+                LoadFonts(viewScale);
+                pendingResolutionRefresh = false;
+            }
+        }
+        camera.zoom = viewScale;
+
+        // Center the reference area in the viewport
+        camera.target = (Vector2){ refW * 0.5f, refH * 0.5f };
+        camera.offset = (Vector2){ rw * 0.5f, rh * 0.5f };
 
         BeginDrawing();
+        BeginMode2D(camera);
         ClearBackground(RAYWHITE);
 
-        BeginMode3D(camera);
+        DrawRectangleLines(0, 0, refW, refH, RED);
+        DrawTextureEx(texTank, (Vector2){refW/2-texTank.width/2.0, refH/2 -texTank.height/2.0}, 0.0, 1.0, WHITE);
 
-        DrawGrid(10, 1.0f);
-
-        DrawRandomShapes3D();
-
-        EndMode3D();
-
-        DrawRandomShapes2D();
-
-        DrawText("Hello World from Raylib + CLion!", 10, 20, 20, BLACK);
-        
+        DrawTextEx(Wfonts.Console, "Hello World from Raylib + CLion! AEIOU aeiou", (Vector2){1,1}, Wfonts.Console.baseSize/viewScale, 0, BLACK);
+        DrawTextEx(Wfonts.Regular, "Hello World from Raylib + CLion! AEIOU aeiou", (Vector2){20,20}, Wfonts.Regular.baseSize/viewScale, 1, BLACK);
+        EndMode2D();
         EndDrawing();
     }
+    UnloadTexture(texTank);
+    UnloadFonts();
     CloseWindow();
     WMemClear();
     return 0;

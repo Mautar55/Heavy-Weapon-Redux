@@ -7,6 +7,9 @@
 #define NULLWREF (wref){NULL_OFFSET}
 #define IS_NULLWREF .offset==NULL_OFFSET
 
+#define Min(i, j) (((i) < (j)) ? (i) : (j))
+#define Max(i, j) (((i) > (j)) ? (i) : (j))
+
 #define random_position\
     {\
     (float)((GetRandomValue(0,1000)/1000.0f*8)-4),\

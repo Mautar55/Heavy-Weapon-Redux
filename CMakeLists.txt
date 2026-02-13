@@ -8,9 +8,14 @@ add_executable(attempt_0 src/main.c src/wutils.h src/wutils.c
         src/random_shapes.h
         src/random_shapes.c
         src/wfonts.h
-        src/game_utils.h)
+        src/game_character.h
+        src/game_character.c
+        src/generated_assets.h
+        src/generated_assets.c
+)
 add_executable(test src/test.c src/wutils.h src/wutils.c)
-add_executable(asset_gen src/asset_gen.c src/wutils.h src/wutils.c)
+add_executable(asset_gen src/asset_gen.c src/wutils.h src/wutils.c
+        src/game_globals.h)
 
 include(FetchContent)
 

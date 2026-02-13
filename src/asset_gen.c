@@ -127,21 +127,34 @@ void CreateAssetsReferenceFile(void)
     list_new(file_paths, AssetPath);
     MakeFilesRelativeToAssets(assetsBase, assetsBase, &file_paths);
 
-    arr_new(contents);
-    arr_append_str(contents, "#pragma once\n\n");
+    arr_new(content_h_file);
+    arr_new(content_c_file);
+    arr_append_str(content_h_file, "#pragma once\n\n");
+
+    char header_start_c[] = "#include \"generated_assets.h\"\n\n";
+    arr_append_str(content_c_file, header_start_c);
+
     foreach_list(AssetPath, i, file_paths,
         replace_characters(i.path, '\\', '/');
         char this_file_name[MAX_FILEPATH_SIZE] = {0};
         strcpy_s(this_file_name, MAX_FILEPATH_SIZE, i.path);
         replace_non_alnum(this_file_name, '_');
-        char part1[] = "extern const char * ass_";
-        arr_append_str(contents, part1);
-        arr_append_str(contents, this_file_name);
-        arr_append_str(contents, " = \"../assets/");
-        arr_append_str(contents, i.path);
-        arr_append_str(contents, "\";\n");
+
+        char part1_h[] = "extern const char * ass_";
+        arr_append_str(content_h_file, part1_h);
+        char part1_c[] = "const char * ass_";
+        arr_append_str(content_c_file, part1_c);
+
+        arr_append_str(content_h_file, this_file_name);
+        arr_append_str(content_h_file, ";\n");
+
+        arr_append_str(content_c_file, this_file_name);
+        arr_append_str(content_c_file, " = \"../assets/");
+        arr_append_str(content_c_file, i.path);
+        arr_append_str(content_c_file, "\";\n");
     );
-    SaveFileText("../src/generated_assets.h", WMemRefFromOffset(contents.items_ref)->ptr);
+    SaveFileText("../src/generated_assets.h", WMemRefFromOffset(content_h_file.items_ref)->ptr);
+    SaveFileText("../src/generated_assets.c", WMemRefFromOffset(content_c_file.items_ref)->ptr);
 }
 
 int main(void) {

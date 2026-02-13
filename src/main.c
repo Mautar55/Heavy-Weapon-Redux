@@ -3,76 +3,84 @@
 #include <string.h>
 #include <time.h>
 
-#include "random_shapes.h"
 #include "raylib.h"
 #include "raymath.h"
 #include "wutils.h"
 #include "generated_assets.h"
-#include "wfonts.h"
-#include "game_utils.h"
+#include "game_character.h"
+#include "game_globals.h"
+
+extern struct WGlobals w;
+extern struct WFonts wfonts;
+
+void UpdateResolutionVars(Camera2D *camera) {
+    w.refW = w.ReferenceWindowSize.x;
+    w.refH = w.ReferenceWindowSize.y;
+    w.rw = (float)GetRenderWidth();
+    w.rh = (float)GetRenderHeight();
+    w.viewScale = Min(w.rw / w.refW, w.rh / w.refH);
+
+    camera->zoom = w.viewScale;
+    camera->target = (Vector2){ w.refW * 0.5f, w.refH * 0.5f };
+    camera->offset = (Vector2){ w.rw * 0.5f, w.rh * 0.5f };
+}
 
 int main(void) {
 
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    Vector2 ReferenceWindowSize = {800, 480};
-    InitWindow(ReferenceWindowSize.x, ReferenceWindowSize.y, "Hello Raylib");
+    w.ReferenceWindowSize = (Vector2){800, 480};
+    InitWindow(w.ReferenceWindowSize.x, w.ReferenceWindowSize.y, "Hello Raylib");
+    SetWindowMinSize(w.ReferenceWindowSize.x, w.ReferenceWindowSize.y);
     SetRandomSeed(time(NULL));
 
     Camera2D camera = { 0 };
-    camera.offset = (Vector2){ 0.0f, 0.0f };    // Camera position
-    camera.target = (Vector2){ 0.0f, 0.0f };      // Camera looking at point
-    camera.rotation = 0.0f;          // Camera up vector (rotation towards target)
-    camera.zoom = 1.0f;  // Camera field-of-view Y
+    camera.offset = (Vector2){ 0.0f, 0.0f };
+    camera.target = (Vector2){ 0.0f, 0.0f };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
 
-    SetTargetFPS(60);                   // Set our game to run at 60 frames-per-second
+    CharacterInitialize();
 
-    Image Tank = LoadImage(ass_tank_png);
-    Texture2D texTank = LoadTextureFromImage(Tank);
-    SetTextureFilter(texTank, TEXTURE_FILTER_BILINEAR);
-    UnloadImage(Tank);
+    SetTargetFPS(60);
 
-    LoadFonts(1.0f);
+    UpdateResolutionVars(&camera);
+    LoadFonts(w.viewScale);
 
     bool pendingResolutionRefresh = false;
     while (!WindowShouldClose())        // Detect window close button or ESC key
     {
-        const float refW = ReferenceWindowSize.x;
-        const float refH = ReferenceWindowSize.y;
-
-        const float rw = (float)GetRenderWidth();
-        const float rh = (float)GetRenderHeight();
-
-        const float viewScale = Min(rw / refW, rh / refH);
+        // Dynamic resolution management
+        UpdateResolutionVars(&camera);
 
         if (IsWindowResized()) {
             pendingResolutionRefresh = true;
         } else {
             if (pendingResolutionRefresh) {
                 UnloadFonts();
-                LoadFonts(viewScale);
+                LoadFonts(w.viewScale);
                 pendingResolutionRefresh = false;
             }
         }
-        camera.zoom = viewScale;
 
-        // Center the reference area in the viewport
-        camera.target = (Vector2){ refW * 0.5f, refH * 0.5f };
-        camera.offset = (Vector2){ rw * 0.5f, rh * 0.5f };
+        CharacterCheckKeysPressed();
 
         BeginDrawing();
         BeginMode2D(camera);
         ClearBackground(RAYWHITE);
 
-        DrawRectangleLines(0, 0, refW, refH, RED);
-        DrawTextureEx(texTank, (Vector2){refW/2-texTank.width/2.0, refH/2 -texTank.height/2.0}, 0.0, 1.0, WHITE);
+        DrawRectangleLines(0, 0, w.refW, w.refH, RED);
 
-        DrawTextEx(Wfonts.Console, "Hello World from Raylib + CLion! AEIOU aeiou", (Vector2){1,1}, Wfonts.Console.baseSize/viewScale, 0, BLACK);
-        DrawTextEx(Wfonts.Regular, "Hello World from Raylib + CLion! AEIOU aeiou", (Vector2){20,20}, Wfonts.Regular.baseSize/viewScale, 1, BLACK);
+        CharacterDraw();
+
+        DrawTextEx(wfonts.Console, "Hello World from Raylib + CLion! AEIOU aeiou",
+            (Vector2){1,1}, wfonts.Console.baseSize/w.viewScale, 0, BLACK);
+        DrawTextEx(wfonts.Regular, "Hello World from Raylib + CLion! AEIOU aeiou",
+            (Vector2){20,20}, wfonts.Regular.baseSize/w.viewScale, 1, BLACK);
         EndMode2D();
         EndDrawing();
     }
-    UnloadTexture(texTank);
+    CharacterUnload();
     UnloadFonts();
     CloseWindow();
     WMemClear();

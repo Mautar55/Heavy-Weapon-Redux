@@ -59,7 +59,7 @@ void CharacterUpdate() {
         character0.lastFire = gameTime;
 
         ProjectileState new_proj = {
-            .position = Vector2FromToAtDistance(GetCharacterPositionWithOffset((Vector2){0,-10}),GetMousePosition(),25),
+            .position = Vector2FromToAtDistance(GetCharacterPositionWithOffset((Vector2){0,-10}),GetMousePositionInFrame(),25),
             .lifetime_max = 1.0,
             .birth_time = gameTime,
             .radius_v = 12,
@@ -67,7 +67,7 @@ void CharacterUpdate() {
             .active = true,
         };
 
-        Vector2 new_velocity = Vector2DirectionScaled(new_proj.position,GetMousePosition(),350);
+        Vector2 new_velocity = Vector2DirectionScaled(new_proj.position,GetMousePositionInFrame(),350);
         new_proj.velocity = new_velocity;//Vector2Add(new_velocity,(Vector2){vel/deltaTime,0});
 
         if (first_inactive >= 0) {

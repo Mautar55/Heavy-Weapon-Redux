@@ -36,6 +36,12 @@ inline Vector2 Vector2DirectionScaled(Vector2 from, Vector2 to, float distance)
         ,distance / Vector2Length(Vector2Subtract(to, from)));
 }
 
+#define GetMousePositionInFrame()                                                    \
+    ((Vector2){                                                                      \
+    (GetMousePosition().x - ((w.rw - (w.refW * w.viewScale)) * 0.5f)) / w.viewScale, \
+    (GetMousePosition().y - ((w.rh - (w.refH * w.viewScale)) * 0.5f)) / w.viewScale  \
+    })
+
 typedef struct {
     size_t offset;
 }wref;

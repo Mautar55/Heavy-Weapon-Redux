@@ -63,7 +63,7 @@ int main(void) {
             }
         }
 
-        CharacterCheckKeysPressed();
+        CharacterUpdate();
 
         BeginDrawing();
         BeginMode2D(camera);

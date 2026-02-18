@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "raylib.h"
+#include "raymath.h"
 
 
 #define NULL_OFFSET ((size_t)-1)
@@ -20,6 +21,21 @@
 #define random_floats\
     (float)((GetRandomValue(0,1000)/1000.0f*8)-4),(float)((GetRandomValue(0,1000)/1000.0f*1)-0),(float)((GetRandomValue(0,1000)/1000.0f*8)-4)
 
+inline Vector2 Vector2FromToAtDistance(Vector2 from, Vector2 to, float distance)
+{
+    return Vector2Add(
+        from, Vector2Scale(
+            Vector2Subtract(to, from)
+        ,distance / Vector2Length(Vector2Subtract(to, from))));
+}
+
+inline Vector2 Vector2DirectionScaled(Vector2 from, Vector2 to, float distance)
+{
+    return Vector2Scale(
+            Vector2Subtract(to, from)
+        ,distance / Vector2Length(Vector2Subtract(to, from)));
+}
+
 typedef struct {
     size_t offset;
 }wref;
@@ -32,6 +48,9 @@ typedef struct {
 
 #define arr_new(label)\
     WArray label = {0};\
+    label.items_ref = NULLWREF;
+
+#define arr_init(label)\
     label.items_ref = NULLWREF;
 
 // returns what used to be // T* items
@@ -69,7 +88,7 @@ typedef struct {
 #define arr_clear(array)\
     (array).size = 0;\
     (array).capacity=0;\
-    WMemClear(array.items_ref);
+    WMemFree(array.items_ref);
 
 #define arr_append_str(array, append_str)\
 do {\

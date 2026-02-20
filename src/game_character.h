@@ -2,10 +2,11 @@
 #include "raylib.h"
 
 typedef struct {
+    double lastFire;
     float ground_position;
     float ground_velocity;
     float fire_frequency;
-    double lastFire;
+    float ground_extents;
     float ground_max_speed;
 } CharacterState;
 

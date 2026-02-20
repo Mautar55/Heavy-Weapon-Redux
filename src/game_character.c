@@ -6,8 +6,10 @@
 #include "game_globals.h"
 #include "raymath.h"
 #include "wutils.h"
+#include "tank_bullet_atlas.h"
 
 Texture2D texTank;
+Texture2D texProjectileAtlas;
 WArray projectile_pool;
 
 void CharacterInitialize() {
@@ -16,11 +18,17 @@ void CharacterInitialize() {
     SetTextureFilter(texTank, TEXTURE_FILTER_BILINEAR);
     UnloadImage(Tank);
 
+    Image ProjectileAtlas = LoadImage(ass_projectiles_tank_bullet_atlas_png);
+    texProjectileAtlas = LoadTextureFromImage(ProjectileAtlas);
+    SetTextureFilter(texProjectileAtlas, TEXTURE_FILTER_BILINEAR);
+    UnloadImage(ProjectileAtlas);
+
     character0.lastFire = GetTime();
     character0.ground_position = 0;
     character0.ground_velocity = 0;
     character0.fire_frequency = 0.2;
     character0.ground_max_speed = 250.0;
+    character0.ground_extents = 375;
 
     arr_init(projectile_pool);
 }
@@ -38,6 +46,7 @@ void CharacterUpdate() {
     }
     character0.ground_velocity = vel;
     character0.ground_position += vel;
+    character0.ground_position = Clamp(character0.ground_position,-character0.ground_extents,character0.ground_extents);
 
     int first_inactive = -1;
     for (int i = 0; i < projectile_pool.size; i++) {
@@ -62,12 +71,12 @@ void CharacterUpdate() {
             .position = Vector2FromToAtDistance(GetCharacterPositionWithOffset((Vector2){0,-10}),GetMousePositionInFrame(),25),
             .lifetime_max = 1.0,
             .birth_time = gameTime,
-            .radius_v = 12,
-            .radius_h = 8,
+            .radius_v = 16,
+            .radius_h = 10,
             .active = true,
         };
 
-        Vector2 new_velocity = Vector2DirectionScaled(new_proj.position,GetMousePositionInFrame(),350);
+        Vector2 new_velocity = Vector2DirectionScaled(new_proj.position,GetMousePositionInFrame(),200);
         new_proj.velocity = new_velocity;//Vector2Add(new_velocity,(Vector2){vel/deltaTime,0});
 
         if (first_inactive >= 0) {
@@ -84,13 +93,54 @@ void CharacterDraw() {
             w.refH-50 -texTank.height/2.0},
             0.0, 1.0, WHITE);
 
+
+    rtpAtlasSprite texBullet = BulletAtlas[TankBullet1];
+
     for (int i = 0; i < projectile_pool.size; i++) {
         ProjectileState *projectile = &arr_get(ProjectileState, projectile_pool, i);
         if (projectile->active) {
             //DrawEllipse(projectile->position.x, projectile->position.y, projectile->radius_h, projectile->radius_v, RED);
-            DrawRectanglePro((Rectangle){projectile->position.x,projectile->position.y,projectile->radius_h,projectile->radius_v},
-                (Vector2){projectile->radius_h/2.0,projectile->radius_v/2.0},
-                RAD2DEG*Vector2Angle((Vector2){0,1},Vector2Normalize(projectile->velocity)), RED);
+
+            DrawRectanglePro(
+                (Rectangle){
+                    projectile->position.x,
+                    projectile->position.y,
+                    projectile->radius_v,
+                    projectile->radius_v},
+                (Vector2){
+                    projectile->radius_v/2.0,
+                    projectile->radius_v/2.0},
+                RAD2DEG*Vector2Angle((Vector2){0,1},Vector2Normalize(projectile->velocity)),
+                DARKGRAY);
+
+            DrawRectanglePro(
+                (Rectangle){
+                    projectile->position.x,
+                    projectile->position.y,
+                    projectile->radius_h,
+                    projectile->radius_v},
+                (Vector2){
+                    projectile->radius_h/2.0,
+                    projectile->radius_v/2.0},
+                RAD2DEG*Vector2Angle((Vector2){0,1},Vector2Normalize(projectile->velocity)),
+                BLACK);
+
+            // part of the texture
+            const Rectangle rectSrc = { texBullet.positionX, texBullet.positionY, texBullet.sourceWidth, texBullet.sourceHeight};
+
+            // Destination rectangle (screen rectangle where drawing part of texture)
+            Rectangle destRec = {
+                projectile->position.x,
+                projectile->position.y,
+                texBullet.sourceWidth,
+                texBullet.sourceHeight
+            };
+
+            const float angle = RAD2DEG*Vector2Angle((Vector2){0,1},Vector2Normalize(projectile->velocity));
+            // Origin of the texture (rotation/scale point), it's relative to destination rectangle size
+            //Vector2 origin = { (float)frameWidth, (float)frameHeight };
+
+            DrawTexturePro(texProjectileAtlas, rectSrc, destRec, (Vector2){texBullet.sourceWidth/2.0,texBullet.sourceHeight/2.0}, angle, WHITE);
         }
 
     }

@@ -67,7 +67,7 @@ int main(void) {
 
         BeginDrawing();
         BeginMode2D(camera);
-        ClearBackground(RAYWHITE);
+        ClearBackground(GRAY);
 
         DrawRectangleLines(0, 0, w.refW, w.refH, RED);
 

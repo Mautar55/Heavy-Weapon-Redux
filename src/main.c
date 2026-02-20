@@ -75,8 +75,15 @@ int main(void) {
 
         DrawTextEx(wfonts.Console, "Hello World from Raylib + CLion! AEIOU aeiou",
             (Vector2){1,1}, wfonts.Console.baseSize/w.viewScale, 0, BLACK);
-        DrawTextEx(wfonts.Regular, "Hello World from Raylib + CLion! AEIOU aeiou",
-            (Vector2){20,20}, wfonts.Regular.baseSize/w.viewScale, 1, BLACK);
+
+        {
+            char tierText[64];
+            snprintf(tierText, sizeof(tierText), "Bullet tier: %d", CharacterGetBulletDamageTier());
+
+            DrawTextEx(wfonts.Regular, tierText,
+                (Vector2){10,10}, wfonts.Regular.baseSize/w.viewScale, 1, BLACK);
+        }
+
         EndMode2D();
         EndDrawing();
     }

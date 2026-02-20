@@ -8,6 +8,7 @@ typedef struct {
     float fire_frequency;
     float ground_extents;
     float ground_max_speed;
+    char bullet_damage_tier;
 } CharacterState;
 
 typedef struct {
@@ -18,9 +19,13 @@ typedef struct {
     float radius_h;
     float lifetime_max;
     bool active;
+    char ornament;
 } ProjectileState;
 
+
 static CharacterState character0;
+
+int CharacterGetBulletDamageTier(void);
 
 void CharacterInitialize();
 void CharacterUpdate();

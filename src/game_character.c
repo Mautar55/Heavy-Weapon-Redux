@@ -29,6 +29,7 @@ void CharacterInitialize() {
     character0.fire_frequency = 0.2;
     character0.ground_max_speed = 250.0;
     character0.ground_extents = 375;
+    character0.bullet_damage_tier = 0;
 
     arr_init(projectile_pool);
 }
@@ -64,6 +65,15 @@ void CharacterUpdate() {
 
     }
 
+    if (IsKeyPressed(KEY_P)) {
+        character0.bullet_damage_tier++;
+    }
+    if (IsKeyPressed(KEY_O)) {
+        character0.bullet_damage_tier--;
+    }
+
+    character0.bullet_damage_tier = Clamp(character0.bullet_damage_tier,0,4);
+
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && gameTime - character0.lastFire >= character0.fire_frequency) {
         character0.lastFire = gameTime;
 
@@ -71,9 +81,10 @@ void CharacterUpdate() {
             .position = Vector2FromToAtDistance(GetCharacterPositionWithOffset((Vector2){0,-10}),GetMousePositionInFrame(),25),
             .lifetime_max = 1.0,
             .birth_time = gameTime,
-            .radius_v = 16,
-            .radius_h = 10,
+            .radius_v = 20,
+            .radius_h = 15,
             .active = true,
+            .ornament = character0.bullet_damage_tier
         };
 
         Vector2 new_velocity = Vector2DirectionScaled(new_proj.position,GetMousePositionInFrame(),200);
@@ -92,9 +103,6 @@ void CharacterDraw() {
         (Vector2){w.refW/2-texTank.width/2.0+character0.ground_position,
             w.refH-50 -texTank.height/2.0},
             0.0, 1.0, WHITE);
-
-
-    rtpAtlasSprite texBullet = BulletAtlas[TankBullet1];
 
     for (int i = 0; i < projectile_pool.size; i++) {
         ProjectileState *projectile = &arr_get(ProjectileState, projectile_pool, i);
@@ -124,6 +132,8 @@ void CharacterDraw() {
                     projectile->radius_v/2.0},
                 RAD2DEG*Vector2Angle((Vector2){0,1},Vector2Normalize(projectile->velocity)),
                 BLACK);
+
+            rtpAtlasSprite texBullet = BulletAtlas[projectile->ornament];
 
             // part of the texture
             const Rectangle rectSrc = { texBullet.positionX, texBullet.positionY, texBullet.sourceWidth, texBullet.sourceHeight};
@@ -157,4 +167,8 @@ Vector2 GetCharacterPosition() {
 
 Vector2 GetCharacterPositionWithOffset(Vector2 offset) {
     return Vector2Add(GetCharacterPosition(),offset) ;
+}
+
+int CharacterGetBulletDamageTier(void) {
+    return (int)character0.bullet_damage_tier;
 }

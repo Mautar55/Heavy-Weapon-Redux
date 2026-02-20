@@ -1,1 +1,1 @@
-A slow attempt to reimplement the game Heavy Weapon Deluxe / Atomic Tank in C with raylib in a way that is compatible with legacy assets, but open to new ones.
+A slow attempt to reimplement the game Heavy Weapon Deluxe / Atomic Tank in C with raylib in a way that is compatible with legacy assets.

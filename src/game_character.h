@@ -31,6 +31,7 @@ void CharacterInitialize();
 void CharacterUpdate();
 void CharacterDraw();
 void CharacterUnload();
+void TestFallingBombs();
 
 Vector2 GetCharacterPosition();
 Vector2 GetCharacterPositionWithOffset();

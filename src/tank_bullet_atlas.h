@@ -42,3 +42,19 @@ enum bullet_atlas {
     TankBullet4 = 3,
     TankBullet5 = 4,
 };
+
+// Bomb atlas sprite properties
+typedef struct BombAtlasSprite {
+    int positionX, positionY;
+    int trimRecWidth, trimRecHeight;
+    //int colliderType;
+    //int colliderPosX, colliderPosY, colliderSizeX, colliderSizeY;
+} BombAtlasSprite;
+
+inline Rectangle TrimmedFromBombAtlas(int spriteIndex, Texture2D sourceTexture) {
+    // there are always 10 bomb sprites within the atlas
+    const int num_sprites = 10;
+    int trimWidth = sourceTexture.width / num_sprites;
+    int trimHeight = sourceTexture.height;
+    return (Rectangle){trimWidth * spriteIndex, 0, trimWidth, trimHeight};
+}

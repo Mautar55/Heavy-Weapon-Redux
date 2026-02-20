@@ -1,22 +1,50 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "raylib.h"
+#include "raymath.h"
+
 
 #define NULL_OFFSET ((size_t)-1)
 #define NULLWREF (wref){NULL_OFFSET}
 #define IS_NULLWREF .offset==NULL_OFFSET
+
+#define Min(i, j) (((i) < (j)) ? (i) : (j))
+#define Max(i, j) (((i) > (j)) ? (i) : (j))
+
+#define random_position\
+    {\
+    (float)((GetRandomValue(0,1000)/1000.0f*8)-4),\
+    (float)((GetRandomValue(0,1000)/1000.0f*1)-0),\
+    (float)((GetRandomValue(0,1000)/1000.0f*8)-4)\
+    }
+
+#define random_floats\
+    (float)((GetRandomValue(0,1000)/1000.0f*8)-4),(float)((GetRandomValue(0,1000)/1000.0f*1)-0),(float)((GetRandomValue(0,1000)/1000.0f*8)-4)
+
+inline Vector2 Vector2FromToAtDistance(Vector2 from, Vector2 to, float distance)
+{
+    return Vector2Add(
+        from, Vector2Scale(
+            Vector2Subtract(to, from)
+        ,distance / Vector2Length(Vector2Subtract(to, from))));
+}
+
+inline Vector2 Vector2DirectionScaled(Vector2 from, Vector2 to, float distance)
+{
+    return Vector2Scale(
+            Vector2Subtract(to, from)
+        ,distance / Vector2Length(Vector2Subtract(to, from)));
+}
+
+#define GetMousePositionInFrame()                                                    \
+    ((Vector2){                                                                      \
+    (GetMousePosition().x - ((w.rw - (w.refW * w.viewScale)) * 0.5f)) / w.viewScale, \
+    (GetMousePosition().y - ((w.rh - (w.refH * w.viewScale)) * 0.5f)) / w.viewScale  \
+    })
+
 typedef struct {
     size_t offset;
 }wref;
-
-typedef struct {
-    Vector3 position;
-} ShapeData;
-
-typedef struct {
-    Vector3 position;
-    Color color;
-} ColoredShape;
 
 typedef struct {
     wref items_ref;
@@ -28,6 +56,9 @@ typedef struct {
     WArray label = {0};\
     label.items_ref = NULLWREF;
 
+#define arr_init(label)\
+    label.items_ref = NULLWREF;
+
 // returns what used to be // T* items
 
 #define arr_append(array, new_item)\
@@ -37,14 +68,14 @@ typedef struct {
             else (array).capacity *= 2;\
             (array).items_ref = WMemRealloc((array).items_ref, (array).capacity * sizeof(new_item));\
         }\
-        WMemRef *ref = WMemRefFromOffset(array.items_ref);\
-        size_t dest_i = array.size++;\
+        WMemRef *ref = WMemRefFromOffset((array).items_ref);\
+        size_t dest_i = (array).size++;\
         size_t elem_size = sizeof new_item;\
         memcpy((char*)ref->ptr + dest_i * elem_size, &new_item, elem_size);\
     } while(0)
 
 #define arr_get(type_cast, array, index)\
-    ((type_cast*)WMemRefFromOffset(array.items_ref)->ptr)[index]\
+    ((type_cast*)WMemRefFromOffset((array).items_ref)->ptr)[index]\
 
 #define arr_set(array, index, new_item)\
     do {\
@@ -63,7 +94,31 @@ typedef struct {
 #define arr_clear(array)\
     (array).size = 0;\
     (array).capacity=0;\
-    WMemClear(array.items_ref);
+    WMemFree(array.items_ref);
+
+#define arr_append_str(array, append_str)\
+do {\
+const char *_src = (const char*)(append_str);\
+if (_src == NULL) break;\
+size_t _src_len = strlen(_src);\
+size_t _dst_start = (array).size;\
+if (_dst_start > 0) {\
+WMemRef *_ref0 = WMemRefFromOffset((array).items_ref);\
+char *_buf0 = (char*)_ref0->ptr;\
+if (_buf0[_dst_start - 1] == '\0') _dst_start--; /* overwrite existing terminator */\
+}\
+size_t _needed = _dst_start + _src_len + 1; /* +1 for '\0' */\
+if (_needed > (array).capacity) {\
+if ((array).capacity == 0) (array).capacity = 256;\
+while (_needed > (array).capacity) (array).capacity *= 2;\
+(array).items_ref = WMemRealloc((array).items_ref, (array).capacity * sizeof(char));\
+}\
+WMemRef *_ref = WMemRefFromOffset((array).items_ref);\
+char *_buf = (char*)_ref->ptr;\
+memcpy(_buf + _dst_start, _src, _src_len);\
+_buf[_dst_start + _src_len] = '\0';\
+(array).size = _dst_start + _src_len + 1;\
+} while(0)
 
 // Heap memory management
 
@@ -121,8 +176,6 @@ typedef struct {
         size_t next;\
     } type##InList;
 
-declare_list_item(ColoredShape)
-
 #define list_new(label, type)\
     WList label = {0};\
     do {\
@@ -135,9 +188,9 @@ declare_list_item(ColoredShape)
     } while(0)
 
 #define foreach_list(item_type, item_label, target_list, operations)\
-size_t idx = target_list.starting_index;\
-for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
-    item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
+size_t idx = (target_list).starting_index;\
+for (size_t n = 0; n < (target_list).list_size && idx != NULL_OFFSET; n++) {\
+    item_type##InList node = arr_get(item_type##InList, (target_list).items, idx);\
     item_type item_label = node.item;\
     \
     operations\
@@ -147,9 +200,9 @@ for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
 
 #define foreach_list_inverted(item_type, item_label, target_list, operations)\
 {\
-size_t idx = target_list.last_index;\
-for (size_t n = 0; n < target_list.list_size && idx != NULL_OFFSET; n++) {\
-    item_type##InList node = arr_get(item_type##InList, target_list.items, idx);\
+size_t idx = (target_list).last_index;\
+for (size_t n = 0; n < (target_list).list_size && idx != NULL_OFFSET; n++) {\
+    item_type##InList node = arr_get(item_type##InList, (target_list).items, idx);\
     item_type item_label = node.item;\
     \
     operations\

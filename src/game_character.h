@@ -32,6 +32,7 @@ void CharacterUpdate();
 void CharacterDraw();
 void CharacterUnload();
 void TestFallingBombs();
+void SpawnPlayerBullet(float angleOffset, char bulletLevel);
 
 Vector2 GetCharacterPosition();
 Vector2 GetCharacterPositionWithOffset();

@@ -16,6 +16,9 @@ Texture2D texFragBombAtlas;
 WArray player_projectile_pool;
 WArray enemy_bombs_pool; // pending implement arr_init_after or something
 
+#define groundHeight\
+    (w.refH-50)
+
 void CharacterInitialize() {
     Image Tank = LoadImage(ass_tank_png);
     texTank = LoadTextureFromImage(Tank);
@@ -121,7 +124,7 @@ void TestFallingBombs() {
     for (int i = 0; i < enemy_bombs_pool.size; i++) {
         ProjectileState *bomb = &arr_get(ProjectileState, enemy_bombs_pool, i);
         if (bomb->active) {
-            if (bomb->lifetime_max >= (gameTime - bomb->birth_time)) {
+            if ((bomb->lifetime_max >= (gameTime - bomb->birth_time)) && bomb->position.y < groundHeight) {
                 bomb->velocity = Vector2Add(bomb->velocity, (Vector2){0,bomb->v_acceleration*deltaTime});
                 bomb->position = Vector2Add(bomb->position,Vector2Scale(bomb->velocity,deltaTime));
             } else {
@@ -167,7 +170,7 @@ void TestFallingBombs() {
 void CharacterDraw() {
     DrawTextureEx(texTank,
         (Vector2){w.refW/2-texTank.width/2.0+character0.ground_position,
-            w.refH-50 -texTank.height/2.0},
+            groundHeight -texTank.height/2.0},
             0.0, 1.0, WHITE);
 
     // DRAWING PLAYER PROJECTILES
@@ -313,7 +316,7 @@ void CharacterUnload() {
 }
 
 Vector2 GetCharacterPosition() {
-    return (Vector2){w.refW/2+character0.ground_position, w.refH-50};
+    return (Vector2){w.refW/2+character0.ground_position, groundHeight};
 }
 
 Vector2 GetCharacterPositionWithOffset(Vector2 offset) {

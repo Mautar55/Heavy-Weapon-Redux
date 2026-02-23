@@ -15,6 +15,7 @@ typedef struct {
     Vector2 position;
     Vector2 velocity;
     double birth_time;
+    float v_acceleration;
     float radius_v;
     float radius_h;
     float lifetime_max;
@@ -33,6 +34,7 @@ void CharacterDraw();
 void CharacterUnload();
 void TestFallingBombs();
 void SpawnPlayerBullet(float angleOffset, char bulletLevel);
+void SpawnEnemyBomb();
 
 Vector2 GetCharacterPosition();
 Vector2 GetCharacterPositionWithOffset();

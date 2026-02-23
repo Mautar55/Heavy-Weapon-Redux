@@ -8,7 +8,6 @@
 #include "wutils.h"
 #include "tank_bullet_atlas.h"
 
-const float ENEMY_BOMB_SPEED = 150.0f;
 int first_player_bullet_inactive = -1;
 
 Texture2D texTank;
@@ -123,6 +122,7 @@ void TestFallingBombs() {
         ProjectileState *bomb = &arr_get(ProjectileState, enemy_bombs_pool, i);
         if (bomb->active) {
             if (bomb->lifetime_max >= (gameTime - bomb->birth_time)) {
+                bomb->velocity = Vector2Add(bomb->velocity, (Vector2){0,bomb->v_acceleration*deltaTime});
                 bomb->position = Vector2Add(bomb->position,Vector2Scale(bomb->velocity,deltaTime));
             } else {
                 if (first_inactive < 0) first_inactive = i;
@@ -141,13 +141,19 @@ void TestFallingBombs() {
             .position = GetMousePositionInFrame(),
             .lifetime_max = 2.0,
             .birth_time = gameTime,
+            .v_acceleration = 150,
             .radius_v = 20,
             .radius_h = 15,
             .active = true,
             .ornament = 0
         };
 
-        Vector2 new_velocity = Vector2Rotate((Vector2){0,ENEMY_BOMB_SPEED}, random_half_angle-(3.14159/2));
+        // RANDOM VELOCITY
+        //const float ENEMY_BOMB_SPEED = 150.0f;
+        //Vector2 new_velocity = Vector2Rotate((Vector2){0,ENEMY_BOMB_SPEED}, random_half_angle-(3.14159/2));
+
+        // Forward Velocity
+        Vector2 new_velocity = ((Vector2){random_sign*100,5});
         new_proj.velocity = new_velocity;//Vector2Add(new_velocity,(Vector2){vel/deltaTime,0});
 
         if (first_inactive >= 0) {
@@ -260,7 +266,7 @@ void CharacterDraw() {
                 // Mirror left-facing directions into the right-facing atlas range and remember to flip the sprite.
                 if (fabsf(actual_angle) > PI*0.5f) {
                     flipX = true;
-                    actual_angle = PI - actual_angle;               // maps e.g. 135° -> 45°
+                    actual_angle = PI - actual_angle;
                 }
 
                 // Clamp to the atlas-supported range (right->down).
@@ -270,8 +276,13 @@ void CharacterDraw() {
                 int spriteIndex = (int)lroundf(actual_angle / step); // nearest frame
                 spriteIndex = (int)Clamp((float)spriteIndex, 0.0f, 9.0f);
 
-                float sprite_angle_rad = spriteIndex * step;        // angle that the chosen sprite frame represents
-                float extra_rot_deg = RAD2DEG * (actual_angle - sprite_angle_rad);
+                float sprite_angle_rad = spriteIndex * step; // angle that the chosen sprite frame represents
+                float extra_rot_deg = 0;
+                if (flipX) {
+                    extra_rot_deg = RAD2DEG * (  -actual_angle + sprite_angle_rad);
+                } else {
+                    extra_rot_deg = RAD2DEG * ( actual_angle - sprite_angle_rad);
+                }
 
                 Rectangle rectSrc = TrimmedFromBombAtlas(spriteIndex, texBomb);
 

@@ -27,6 +27,9 @@
 #define random_half_angle\
     ((float)(GetRandomValue(0,314159)/100000.0f))
 
+#define random_sign\
+    ((float)((GetRandomValue(0,1)*2)-1))
+
 inline Vector2 Vector2FromToAtDistance(Vector2 from, Vector2 to, float distance)
 {
     return Vector2Add(

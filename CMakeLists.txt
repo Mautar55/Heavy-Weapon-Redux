@@ -12,6 +12,8 @@ add_executable(attempt_0 src/main.c src/wutils.h src/wutils.c
         src/generated_assets.h
         src/generated_assets.c
         src/tank_bullet_atlas.h
+        src/wmath.h
+        src/wmath.c
 )
 add_executable(test src/test.c src/wutils.h src/wutils.c)
 add_executable(asset_gen src/asset_gen.c src/wutils.h src/wutils.c

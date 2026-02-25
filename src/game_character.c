@@ -7,6 +7,7 @@
 #include "raymath.h"
 #include "wutils.h"
 #include "tank_bullet_atlas.h"
+#include "wmath.h"
 
 int first_player_bullet_inactive = -1;
 
@@ -15,6 +16,9 @@ Texture2D texProjectileAtlas;
 Texture2D texFragBombAtlas;
 WArray player_projectile_pool;
 WArray enemy_bombs_pool; // pending implement arr_init_after or something
+
+WArray PlayerBulletCollisions;
+WArray EnemyBombCollisions;
 
 #define groundHeight\
     (w.refH-50)
@@ -45,6 +49,8 @@ void CharacterInitialize() {
 
     arr_init(player_projectile_pool);
     arr_init(enemy_bombs_pool);
+    arr_init(PlayerBulletCollisions);
+    arr_init(EnemyBombCollisions);
 }
 
 void CharacterUpdate() {
@@ -60,7 +66,8 @@ void CharacterUpdate() {
     }
     character0.ground_velocity = vel;
     character0.ground_position += vel;
-    character0.ground_position = Clamp(character0.ground_position,-character0.ground_extents,character0.ground_extents);
+    character0.ground_position =
+        Clamp(character0.ground_position,-character0.ground_extents,character0.ground_extents);
 
     int first_player_bullet_inactive = -1;
     for (int i = 0; i < player_projectile_pool.size; i++) {
@@ -93,11 +100,66 @@ void CharacterUpdate() {
     }
 
     TestFallingBombs();
+    CheckCollisions();
+}
+
+void CheckCollisions() {
+    // Collisions
+    arr_empty(PlayerBulletCollisions);
+    arr_empty(EnemyBombCollisions);
+
+    for (int i = 0; i < player_projectile_pool.size; i++) {
+        ProjectileState *projectile = &arr_get(ProjectileState, player_projectile_pool, i);
+        if (projectile->active) {
+            for (int j = 0; j < enemy_bombs_pool.size; j++) {
+                ProjectileState *bomb = &arr_get(ProjectileState, enemy_bombs_pool, j);
+                if (bomb->active) {
+                    if (CheckCollisionRotatedEllipses(
+                            projectile->position,
+                            projectile->radius_h,
+                            projectile->radius_v,
+                            ProjectileRotation(projectile),
+                            bomb->position, bomb->radius_h, bomb->radius_v, ProjectileRotation(bomb))) {
+
+                        ProjectileCollision hit = {
+                            .entityTarget = j,
+                            .impactPoint = Vector2Lerp(projectile->position, bomb->position, 0.5f),
+                            .collisionType = ToEnemy
+                        };
+                        arr_append(PlayerBulletCollisions, hit);
+                        bomb->active = false;
+                    }
+                }
+            }
+        }
+    }
+
+    Vector2 playerPos = GetCharacterPosition();
+    float playerRadius = 20.0f; // Assumption based on tank size
+
+    for (int i = 0; i < enemy_bombs_pool.size; i++) {
+        ProjectileState *bomb = &arr_get(ProjectileState, enemy_bombs_pool, i);
+        if (bomb->active) {
+            if (CheckCollisionRotatedEllipseCircle(
+                    bomb->position, bomb->radius_h, bomb->radius_v, ProjectileRotation(bomb),
+                    playerPos, playerRadius)) {
+                
+                ProjectileCollision hit = {
+                    .entityTarget = 0, // Only one player
+                    .impactPoint = playerPos,
+                    .collisionType = ToPlayer
+                };
+                arr_append(EnemyBombCollisions, hit);
+                bomb->active = false;
+            }
+        }
+    }
 }
 
 void SpawnPlayerBullet(float AngleOffset, char bulletLevel) {
     ProjectileState new_proj = {
-        .position = Vector2FromToAtDistance(GetCharacterPositionWithOffset((Vector2){0,-10}),GetMousePositionInFrame(),25),
+        .position = Vector2FromToAtDistance(GetCharacterPositionWithOffset((Vector2){0,-10}),
+            GetMousePositionInFrame(),25),
         .lifetime_max = 1.0,
         .birth_time = GetTime(),
         .radius_v = 20,
@@ -106,7 +168,8 @@ void SpawnPlayerBullet(float AngleOffset, char bulletLevel) {
         .ornament = bulletLevel
     };
 
-    Vector2 new_velocity = Vector2Rotate(Vector2DirectionScaled(new_proj.position,GetMousePositionInFrame(),350), AngleOffset);
+    Vector2 new_velocity = Vector2Rotate(Vector2DirectionScaled(new_proj.position
+        ,GetMousePositionInFrame(),350), AngleOffset);
     new_proj.velocity = new_velocity;//Vector2Add(new_velocity,(Vector2){vel/deltaTime,0});
 
     if (first_player_bullet_inactive >= 0) {
@@ -282,7 +345,7 @@ void CharacterDraw() {
                 float sprite_angle_rad = spriteIndex * step; // angle that the chosen sprite frame represents
                 float extra_rot_deg = 0;
                 if (flipX) {
-                    extra_rot_deg = RAD2DEG * (  -actual_angle + sprite_angle_rad);
+                    extra_rot_deg = RAD2DEG * (-actual_angle + sprite_angle_rad);
                 } else {
                     extra_rot_deg = RAD2DEG * ( actual_angle - sprite_angle_rad);
                 }

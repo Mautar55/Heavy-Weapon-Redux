@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include "raymath.h"
 
 typedef struct {
     double lastFire;
@@ -23,6 +24,16 @@ typedef struct {
     char ornament;
 } ProjectileState;
 
+typedef enum {
+    ToPlayer,
+    ToEnemy
+} CollisionType;
+
+typedef struct {
+    size_t entityTarget;
+    Vector2 impactPoint;
+    CollisionType collisionType;
+} ProjectileCollision;
 
 static CharacterState character0;
 
@@ -35,6 +46,15 @@ void CharacterUnload();
 void TestFallingBombs();
 void SpawnPlayerBullet(float angleOffset, char bulletLevel);
 void SpawnEnemyBomb();
+void CheckCollisions();
 
 Vector2 GetCharacterPosition();
 Vector2 GetCharacterPositionWithOffset();
+
+inline float ProjectileSpeed(ProjectileState *projectile) {
+   return Vector2Length(projectile->velocity);
+}
+
+inline float ProjectileRotation(ProjectileState *projectile) {
+    return Vector2Angle((Vector2){0,1}, projectile->velocity);
+}

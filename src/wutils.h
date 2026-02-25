@@ -100,6 +100,9 @@ typedef struct {
         if (_i >= (array).size) (array).size = _i + 1;\
     } while (0)
 
+#define arr_empty(array)\
+    (array).size = 0;
+
 #define arr_clear(array)\
     (array).size = 0;\
     (array).capacity=0;\
@@ -219,6 +222,16 @@ for (size_t n = 0; n < (target_list).list_size && idx != NULL_OFFSET; n++) {\
     idx = node.prev;\
     };\
 }
+
+#define foreach_list_naive(item_type, item_label, target_list, operations)\
+    {\
+        for (size_t _i = 0; _i < (target_list).items.size; _i++) {\
+            item_type##InList _node = arr_get(item_type##InList, (target_list).items, _i);\
+            if (_i != (target_list).starting_index && _node.prev == NULL_OFFSET && _node.next == NULL_OFFSET) continue;\
+            item_type item_label = _node.item;\
+            operations\
+        }\
+    }
 
 void list_insert_at(WList* target_list, void* item_to_add, size_t target_pos);
 void list_insert_first(WList* target_list, void* item_to_add);

@@ -199,6 +199,16 @@ typedef struct {
         label.list_size = 0;\
     } while(0)
 
+#define list_init(label, type)\
+    do {\
+        arr_new( inner_arr_##label )\
+        label.items = inner_arr_##label;\
+        label.item_size = sizeof(type);\
+        label.starting_index = NULL_OFFSET;\
+        label.last_index = NULL_OFFSET;\
+        label.list_size = 0;\
+    } while(0)
+
 #define foreach_list(item_type, item_label, target_list, operations)\
 size_t idx = (target_list).starting_index;\
 for (size_t n = 0; n < (target_list).list_size && idx != NULL_OFFSET; n++) {\

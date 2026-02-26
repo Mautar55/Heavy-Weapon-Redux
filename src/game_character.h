@@ -49,7 +49,7 @@ void SpawnEnemyBomb();
 void CheckCollisions();
 
 Vector2 GetCharacterPosition();
-Vector2 GetCharacterPositionWithOffset(Vector2 offset);
+Vector2 GetCharacterPositionWithOffset();
 
 inline float ProjectileSpeed(ProjectileState *projectile) {
    return Vector2Length(projectile->velocity);
@@ -58,12 +58,3 @@ inline float ProjectileSpeed(ProjectileState *projectile) {
 inline float ProjectileRotation(ProjectileState *projectile) {
     return Vector2Angle((Vector2){0,1}, projectile->velocity);
 }
-
-#define declare_list_item_struct(type) \
-    typedef struct { \
-        type item; \
-        size_t prev; \
-        size_t next; \
-    } type##InList;
-
-declare_list_item_struct(ProjectileState)
